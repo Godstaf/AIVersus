@@ -30,8 +30,9 @@
     border-radius: 25px 25px 25px 25px;
     padding: 0px;
     stroke: #0F101B;
-    border: #080A10;
+    border: #080A10;    
 }
+
 .bottom-textbox textarea {
     padding: 20px;    
     width: 100%;
