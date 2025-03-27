@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="{{ url_for('static', filename='style.css') }}"
+      rel="stylesheet"
+    />
     <script src="script.js"></script>
     <title>AI Versus</title>
-</head>
-<body class="body">
-
-    <div class="header">
+  </head>
+  <body class="body">
+    <nav class="navbar">
+      <div class="header">
         <h1 class="header-text">AI Versus</h1>
-    </div>
-
-    <div class="bottom-textbox">
-        <textarea class="bottom-textbox textarea" placeholder="Type your message here..." name="Query" id="qry"></textarea>
-    </div>
-    
-</body>
+      </div>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('login_page') }}">Login</a></li>
+      </ul>
+    </nav>
+    <form action="{{ url_for('query_page') }}" method="POST">
+      <div class="bottom-textbox">
+        <textarea
+          class="bottom-textbox textarea"
+          placeholder="Type your message here..."
+          name="Query"
+          id="qry"
+        ></textarea>
+        <div class="bottom-textbox button-container">
+          <button class="btn btn-search" type="submit">Search</button>
+          <button class="btn btn-reason">Gemini</button>
+        </div>
+      </div>
+    </form>
+  </body>
 </html>

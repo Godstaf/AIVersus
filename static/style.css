@@ -1,0 +1,110 @@
+.body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    /* background-color:  #212121; */
+    background-color:  #0F101B;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #0F101B;
+    position: relative;
+}
+
+.header {
+    position: relative;
+    background-color: #0F101B;
+    flex: 1;
+    color: #ffffff;
+    text-align: center;
+    border-bottom: 1px solid #080A10;
+}
+
+.header-text {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.nav-links li {
+    margin-left: 20px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.nav-links a:hover {
+    color: #ddd;
+}
+
+.bottom-textbox {
+    position: fixed;
+    bottom: 10px;
+    width: 60%;
+    background-color: #080A10;
+    color: #ffffff;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 25px 25px 25px 25px;
+    padding: 0px;
+    stroke: #0F101B;
+    border: #080A10;
+}
+
+
+.bottom-textbox textarea {
+    padding: 20px;
+    width: 100%;
+    height: 80px;
+    resize: none;
+    outline: none;
+    stroke: #0F101B;
+    background-color: #080A10;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: large;
+    overflow: auto;
+    scrollbar-width: none;
+}
+
+.bottom-textbox button-container {
+    display: flex;
+    width: 200%;
+    justify-content: space-around; /* Space buttons evenly */
+    margin-top: -10px; /* Pull the buttons closer to the textarea */
+    padding: 10px;
+    background-color: #080A10; /* Match the textarea background */
+    border-bottom-left-radius: 25px; /* Integrate with the bottom corners */
+    border-bottom-right-radius: 25px; /* Integrate with the bottom corners */
+    border: 1px solid #0F101B; /* Match the textarea border */
+}
+
+.btn {
+    background-color: #1a1b2f; /* Button background */
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #2a2b3f; /* Slightly lighter on hover */
+}
