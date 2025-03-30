@@ -109,13 +109,27 @@
     background-color: #2a2b3f; /* Slightly lighter on hover */
 }
 
+.convo{
+    padding-left: 2%;
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    /* flex-wrap: nowrap; */
 
+    gap: 10px;
+}
+
+.convo p{
+    display: flex;
+    flex-direction: column;
+}
 /* just bellow the navbar */
 .response-container {
-    margin: 10px 0;
+    margin: 0;
     padding: 10px;
     background-color: #1a1b2f; /* Background for each response */
     color: #ffffff;
     border-radius: 10px;
     line-height: 1.5; /* Increase line height for readability */
-  }
+    word-wrap: break-word; /* Ensure long words break to the next line */
+}

@@ -20,9 +20,12 @@
         <li><a href="{{ url_for('login_page') }}">Login</a></li>
       </ul>
     </nav>
+
     <div class="convo">
-      
+      <div class="response-container">Hi there! How can I help you today?<br></div>
+      <div class="response-container">Hi there! How can I help you today?<br></div>
     </div>
+    
     <form action="{{ url_for('query_page') }}" method="POST" data-query-url="{{ url_for('query_page') }}">
       <div class="bottom-textbox">
         <textarea
