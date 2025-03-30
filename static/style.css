@@ -112,7 +112,7 @@
 .convo{
     padding-left: 2%;
     display: flex;
-    width: auto;
+    width: 45%;
     flex-direction:  column;
     align-items: left;
 
@@ -124,22 +124,22 @@
 
 /* just bellow the navbar */
 .response-container {
-    max-width: 400px;
+    max-width: 45%;
     width: fit-content;
     margin: 0;
     padding: 10px;
     background-color: #1a1b2f; /* Background for each response */
     color: #ffffff;
     border-radius: 10px;
-    line-height: 1.5; /* Increase line height for readability */
+    line-height: 1.5; /*Increase line height for readability*/
     word-wrap: break-word; /* Ensure long words break to the next line */
 }
 
 .flex-box{
-    max-width: 400px;
+    max-width: 45%;
     width: fit-content;
-    background-color: #1a1b2f;
-    color: #ffffff;
+    /* background-color: #1a1b2f;
+    color: #ffffff; */
     padding: 10px;
     border-radius: 9px;
 }
