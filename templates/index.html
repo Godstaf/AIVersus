@@ -11,6 +11,7 @@
     <title>AI Versus</title>
   </head>
   <body class="body">
+    
     <nav class="navbar">
       <div class="header">
         <h1 class="header-text">AI Versus</h1>
@@ -19,7 +20,7 @@
         <li><a href="{{ url_for('login_page') }}">Login</a></li>
       </ul>
     </nav>
-    <form action="{{ url_for('query_page') }}" method="POST">
+    <form action="{{ url_for('query_page') }}" method="POST" data-query-url="{{ url_for('query_page') }}">
       <div class="bottom-textbox">
         <textarea
           class="bottom-textbox textarea"
@@ -33,5 +34,7 @@
         </div>
       </div>
     </form>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
   </body>
 </html>

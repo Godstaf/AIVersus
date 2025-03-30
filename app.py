@@ -24,10 +24,13 @@ def query_page():
         model="gemini-2.0-flash", contents=[qry]
     )
     print("\n\n", response.text, "\n\n")
-    return {"response": response.results[0].content}
-    # return {"response": qry}
+    # print("\n\n", response, "\n\n")
     
-
+    return{"response": response.text}
+    
+    # return {"response": response.results[0].content}
+    # return {"response": qry} 
+    
 
 if __name__ == "__main__":
     app.run(debug=True)

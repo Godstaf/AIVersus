@@ -108,3 +108,25 @@
 .btn:hover {
     background-color: #2a2b3f; /* Slightly lighter on hover */
 }
+
+/* just bellow the navbar */
+.response-container {
+    position: fixed;
+    top: 60px; /* Adjust this value to position below the navbar */
+    bottom: 500px; /* Adjust this value to position above the bottom textbox */
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #080A10;
+    color: #ffffff;
+    border-top: 1px solid #080A10;
+    border-bottom: 1px solid #080A10;
+}
+.response-container p {
+    margin: 0 0 10px; /* Add some space between paragraphs */
+    padding: 10px;
+    background-color: #1a1b2f; /* Background for each response */
+    border-radius: 10px;
+    line-height: 1.5; /* Increase line height for readability */
+}
