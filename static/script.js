@@ -12,22 +12,14 @@ document.querySelector("form").addEventListener("submit", async function (event)
     response = await response.json(); // Get the response text
 
     console.log('Response:', response.response); // Log the response for debugging
-    // alert(x.response)
-    let divCount = 0
-    // Display the response between <nav> and <form>
-    const responseContainer = document.getElementById("response-container"+divCount); // Check if the div already exists
-    if (!responseContainer) {
-      divCount+=1
-      // Create a new div if it doesn't exist
-      const newDiv = document.createElement("div");
-      newDiv.id = "response-container"+divCount; // Unique ID for the new div
-      newDiv.className = "response-container";
-      newDiv.innerText = response.response; // Set the response text
-      document.querySelector("nav").insertAdjacentElement("afterend", newDiv);
-    } else {
-      // Update the existing div
-      responseContainer.innerText = response.response;
-    }
+    // alert(x.response) 
+
+    // Add the response to the .convo div
+    const convoDiv = document.querySelector(".convo");
+    const newDiv = document.createElement("div");
+    newDiv.className = "response-container";
+    newDiv.innerText = response.response; // Set the response text
+    convoDiv.appendChild(newDiv); // Append the new div to .convo
 
   } catch (error) {
     console.error("Error:", error);
