@@ -111,20 +111,21 @@
 
 .convo{
     padding-left: 2%;
-    width: 45%;
     display: flex;
-    flex-direction: column;
+    width: auto;
+    flex-direction:  column;
+    align-items: left;
+
     /* flex-wrap: nowrap; */
 
     gap: 10px;
 }
 
-.convo p{
-    display: flex;
-    flex-direction: column;
-}
+
 /* just bellow the navbar */
 .response-container {
+    max-width: 400px;
+    width: fit-content;
     margin: 0;
     padding: 10px;
     background-color: #1a1b2f; /* Background for each response */
@@ -136,7 +137,7 @@
 
 .flex-box{
     max-width: 400px;
-    width: 100%;
+    width: fit-content;
     background-color: #1a1b2f;
     color: #ffffff;
     padding: 10px;
