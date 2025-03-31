@@ -5,7 +5,7 @@ document.querySelector("form").addEventListener("submit", async function (event)
   // Add the query in .convo div
   const convoDiv = document.querySelector(".convo");
   const newDiv = document.createElement("div");
-  newDiv.className = "response-container"; // Add a class to the new div
+  newDiv.className = "query-container"; // Add a class to the new div
   newDiv.innerText = document.getElementById("qry").value; // Set the query text
   console.log(document.getElementById("qry").value)
   convoDiv.appendChild(newDiv); // Append the new div to .convo
@@ -13,6 +13,8 @@ document.querySelector("form").addEventListener("submit", async function (event)
 
   const formData = new FormData(this); // Get form data
   const queryUrl = this.getAttribute("data-query-url"); // Get the query URL from the form attribute
+  document.getElementById("qry").value = ""; // Clear the input field
+    // Add the response to the .convo div
   try {
     let response = await fetch(queryUrl, {
       method: "POST",
@@ -22,8 +24,7 @@ document.querySelector("form").addEventListener("submit", async function (event)
 
     console.log('Response:', response.response); // Log the response for debugging
     // alert(x.response) 
-    document.getElementById("qry").value = ""; // Clear the input field
-    // Add the response to the .convo div
+    
     const convoDiv = document.querySelector(".convo");
     const newDiv = document.createElement("div");
     newDiv.className = "response-container";

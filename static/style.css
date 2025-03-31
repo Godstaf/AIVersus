@@ -2,8 +2,14 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    /* background-color:  #212121; */
     background-color:  #0F101B;
+    overflow: auto;
+    scrollbar-width: none; 
+}
+
+html, body {
+    overflow: auto;
+    scrollbar-width: none;
 }
 
 .navbar {
@@ -53,7 +59,20 @@
     color: #ddd;
 }
 
+
+.formContainer {
+    position: fixed;
+    bottom: 0px;
+    height: 140px;
+    width: 100%;
+    background-color: #0F101B;
+    color: #ffffff;
+}
+
 .bottom-textbox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     position: fixed;
     bottom: 10px;
     width: 60%;
@@ -66,6 +85,7 @@
     stroke: #0F101B;
     border: #080A10;
 }
+
 
 
 .bottom-textbox textarea {
@@ -83,24 +103,27 @@
 }
 
 .bottom-textbox button-container {
-    display: flex;
-    width: 200%;
-    justify-content: space-around; /* Space buttons evenly */
-    margin-top: -10px; /* Pull the buttons closer to the textarea */
-    padding: 10px;
-    background-color: #080A10; /* Match the textarea background */
-    border-bottom-left-radius: 25px; /* Integrate with the bottom corners */
-    border-bottom-right-radius: 25px; /* Integrate with the bottom corners */
-    border: 1px solid #0F101B; /* Match the textarea border */
+    display: flex; /* Enable flexbox for buttons */
+    gap: 10px; /* Add spacing between buttons */
+    align-items: end; /* Center buttons vertically */
+    justify-content: flex-end; /* Align buttons to the right */
+    width: 25%; /* Adjust width to fit buttons */
+    padding-right: 10px; /* Add padding to the right */
 }
 
 .btn {
+    position: relative;
+    align-items: center;
+    width: auto;
+    max-width: 150px;
+    padding: 10px 5%;
     background-color: #1a1b2f; /* Button background */
     color: white;
     border: none;
     border-radius: 15px;
     padding: 10px 20px;
-    font-size: 14px;
+    font-size: 1rem;
+    text-align: center;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -110,22 +133,48 @@
 }
 
 .convo{
-    padding-left: 2%;
     display: flex;
-    max-width: 45%;
-    width: fit-content;
+    width: 90%;
     flex-direction: column;
     gap: 10px;
+    margin: 0 auto;
     padding: 10px;
     border-radius: 9px;
-    padding-left: 2%;
     border-bottom: 20%;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
 
+/* Hide scrollbar for Webkit browsers (Chrome, Edge, Safari) */
+.convo::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
 
 /* just bellow the navbar */
 .response-container {
-    max-width: 100%;
+    padding-left: 10%;
+    align-self: flex-start; /* Align to the left side of the screen */
+    display: flex;
+    max-width: 45%;
+    width: fit-content;
+    margin: 0;
+    padding: 10px;
+    background-color: #1a1b2f; /* Background for each response */
+    color: #ffffff;
+    border-radius: 10px;
+    line-height: 1.5; /*Increase line height for readability*/
+    word-wrap: break-word; /* Ensure long words break to the next line */
+}
+
+
+/* This is the CSS for the query container, which is used to display the user's query in a styled box on the right side of the screen. */
+.query-container {
+    display: flex;
+    padding-right: 10%;
+    align-self: flex-end; /* Align to the right side of the screen */
+    max-width: 45%;
     width: fit-content;
     margin: 0;
     padding: 10px;
