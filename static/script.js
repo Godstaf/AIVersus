@@ -1,3 +1,5 @@
+
+
 document.querySelector("form").addEventListener("submit", async function (event) {
   // console.log('Form submitted'); // Log form submission for debugging
   event.preventDefault(); // Prevent the form from reloading the page
