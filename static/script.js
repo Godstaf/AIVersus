@@ -39,3 +39,18 @@ document.querySelector("form").addEventListener("submit", async function (event)
     alert("An error occurred. Please try again.");
   }
 });
+
+
+
+// Add event listener for the Enter key on the text box
+document.getElementById("qry").addEventListener("keydown", function (event) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    // If Enter is pressed without Shift, trigger form submission
+    event.preventDefault(); // Prevent default behavior (e.g., adding a new line)
+    document.querySelector("form").dispatchEvent(new Event("submit")); // Trigger the form submission
+  } else if (event.key === "Enter" && event.shiftKey) {
+    // If Shift + Enter is pressed, allow a new line
+    event.stopPropagation(); // Prevent triggering the form submission
+  }
+});
+

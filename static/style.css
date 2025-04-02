@@ -21,6 +21,10 @@ html, body {
     position: relative;
 }
 
+#logo{
+    text-align: center;
+}
+
 .header {
     position: relative;
     background-color: #0F101B;
