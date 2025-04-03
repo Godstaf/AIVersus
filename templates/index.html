@@ -12,21 +12,22 @@
 <body class="body">
 
   <nav class="navbar">
-    <span class="header">
+    <div class="header">
       <!-- make like of white colour and without any underline -->
       <a href="{{ url_for('index') }}" style="color: white; text-decoration: none; text-underline-position: none;">
       <h1 class="header-text" id="logo">AI Versus</h1>
       </a>
-    </span>
-    <ul class="nav-links">
-      <li><a href="{{ url_for('register_page') }}">Sign up</a></li>
-    </ul>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('register_page') }}">Sign up</a></li>
+      </ul>
+      </div>
+>
   </nav>
 
   <div class="convo">
 
-    <!-- <div class="query-container">Hi<br></div>
-    <div class="response-container">Hi there! How can I help you today?<br></div> -->
+    <div class="query-container">Hi<br></div>
+    <div class="response-container">Hi there! How can I help you today?<br></div>
 
   </div>
 

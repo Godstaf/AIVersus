@@ -27,6 +27,7 @@ html, body {
 
 .header {
     position: relative;
+    /* display: block; */
     background-color: #0F101B;
     flex: 1;
     color: #ffffff;

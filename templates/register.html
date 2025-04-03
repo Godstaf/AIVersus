@@ -1,25 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
-    <title>register</title>
-  </head>
 
-  <body style="background-color: #0f101b">
-    
-    <nav class="navbar">
-      
-      <div class="header" style="text-align: center; font-size: 40px; color: white; padding-top: 0px;">
-        <a href="{{ url_for('register_page') }}" style="color: white; text-decoration: none; text-underline-position: none;">
-          <h1 class="header-text" id="logo">Register</h1>
-        </a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styleRegister.css') }}">
+  <title>Register</title>
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="header">
+      <a href="{{ url_for('register_page') }}">
+        <h1 class="header-text" id="logo">Register</h1>
+      </a>
+    </div>
+  </nav>
+
+  <form action="{{ url_for('registerit') }}" method="post">
+    <div class="formItems">
+      <div class="email">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" />
       </div>
-    </nav>
 
-    
+      <div class="name">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" />
+      </div>
 
+      <div class="password">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" />
+      </div>
 
-  </body>
+      <div class="submit">
+        <input type="submit" value="Register">
+      </div>
+    </div>
+  </form>
+</body>
+
 </html>
