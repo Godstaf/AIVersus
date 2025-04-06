@@ -54,3 +54,39 @@ document.getElementById("qry").addEventListener("keydown", function (event) {
   }
 });
 
+// let sideBar = document.querySelector(".history-tab").addEventListener("click", ()=>{
+//   let sideTab = document.createElement("div");
+//   sideTab.classList.add("history-tab-div");
+//   sideBar.appendChild(sideTab);
+// })
+
+document.querySelector(".history-tab").addEventListener("click", () => {
+  let existingSideTab = document.querySelector(".history-tab-div");
+
+  if (existingSideTab) return;
+  
+  let sideTab = document.createElement("div");
+  sideTab.classList.add("history-tab-div");
+
+  let removeIcon = document.createElement("button");
+  removeIcon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+
+  let nav = document.createElement("nav");
+  let navText = document.createElement("h3");
+  navText.innerHTML=`History`;
+  
+
+  let contentdiv = document.createElement("div");
+  contentdiv.classList.add("sidebar-content-div");
+  contentdiv.innerText = "Simple Conversation"
+
+  sideTab.appendChild(nav);
+  nav.appendChild(navText);
+  nav.appendChild(removeIcon);
+  sideTab.appendChild(contentdiv);
+  document.body.appendChild(sideTab);
+
+    removeIcon.addEventListener("click", ()=>{
+      sideTab.remove();
+    })
+});

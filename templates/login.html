@@ -13,24 +13,19 @@
     <nav class="navbar">
       <div class="header">
         <a href="{{ url_for('register_page') }}">
-          <h1 class="header-text" id="logo">Register</h1>
+          <h1 class="header-text" id="logo">Login</h1>
         </a>
       </div>
     </nav>
   
     <form action="{{ url_for('registerit') }}" method="post">
       <div class="welcome-div">
-        <p>Create New Account</p>
+        <p>Welcome Back!</p>
       </div>
       <div class="formItems">
         <div class="email">
           <label for="email">Email:</label>
           <input type="email" id="email" name="email" />
-        </div>
-  
-        <div class="name">
-          <label for="name">Name:</label>
-          <input type="text" id="name" name="name" />
         </div>
   
         <div class="password">
@@ -40,15 +35,14 @@
   
         <div class="submit-field">
           <div class="submit">
-              <input type="submit" value="Register">
+              <input type="submit" value="Login">
           </div>
-          <a href="{{ url_for('login_page') }}">
-              <p>Aleady have an account?</p>
+          <a href="{{ url_for('register_page') }}">
+            <p>Don't have an account?</p>
           </a>
-        </div>
+      </div>
       </div>
     </form>
   </div>
 </body>
-
 </html>

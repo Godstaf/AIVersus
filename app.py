@@ -37,6 +37,10 @@ def index():
 def register_page():
     return render_template("register.html")
 
+@app.route("/login", methods=["POST", "GET"])
+def login_page():
+    return render_template("login.html")
+
 
 @app.route("/query", methods=["POST"])
 def query_page():

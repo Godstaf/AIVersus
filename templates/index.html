@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="script.js"></script>
   <title>AI Versus</title>
 </head>
@@ -14,33 +15,49 @@
   <nav class="navbar">
     <div class="header">
       <!-- make like of white colour and without any underline -->
-      <a href="{{ url_for('index') }}" style="color: white; text-decoration: none; text-underline-position: none;">
+      <div class="history-tab">
+        <i class="fa-solid fa-table-list"></i>
+      </div>
+      <a href="{{ url_for('index') }}" style="color: white; text-decoration: none; text-underline-position: none;" class="nav-title">
       <h1 class="header-text" id="logo">AI Versus</h1>
       </a>
       <ul class="nav-links">
-        <li><a href="{{ url_for('register_page') }}">Sign up</a></li>
+        <li><a href="{{ url_for('register_page') }}">
+          <i class="fa-regular fa-user"></i>
+        </a></li>
       </ul>
-      </div>
->
+    </div>
   </nav>
 
   <div class="convo">
 
-    <div class="query-container">Hi<br></div>
-    <div class="response-container">Hi there! How can I help you today?<br></div>
+    <!-- <div class="query-container">Hi<br></div>
+    <div class="response-container">Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi voluptas sint quia voluptate. Ipsum, ad numquam consectetur facere fugit neque voluptate sed? Delectus laborum ducimus voluptate inventore quae unde dolores<br></div> -->
 
   </div>
 
   <div class="formContainer">
     <form action="{{ url_for('query_page') }}" method="POST" data-query-url="{{ url_for('query_page') }}">
+
       <div class="bottom-textbox">
-        <textarea class="bottom-textbox textarea" placeholder="Type your message here..." name="Query" id="qry"></textarea>
-        <div class="bottom-textbox button-container">
-          <button class="btn btn-search" type="submit">Search</button>
+        <textarea class="textarea" placeholder="Type your message here..." name="Query" id="qry"></textarea>
+
+        <div class="below-search">
+          <div class="chat-bots-buttons">
+            <a><img src="{{ url_for('static', filename='chatgpt-logo-chat-gpt-icon-on-white-background-free-vector.jpg') }}" alt="ChatGPT"></a>
+            <a><img src="{{ url_for('static', filename='DeepSeek_logo_icon.png') }}" alt="DeepSeek"></a>
+            <a><img src="{{ url_for('static', filename='images.jpeg') }}" alt="Other"></a>
+          </div>
+          <div class="button-container">
+            <button class="btn btn-search" type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
         </div>
+
       </div>
+
     </form>
   </div>
+  
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 

@@ -5,9 +5,13 @@
     background-color:  #0F101B;
     overflow: auto;
     scrollbar-width: none; 
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden; 
 }
 
-html, body {
+html body {
     overflow: auto;
     scrollbar-width: none;
 }
@@ -19,21 +23,43 @@ html, body {
     padding: 10px 20px;
     background-color: #0F101B;
     position: relative;
+    /* width: 100%; */
+    z-index: 3;
 }
 
 #logo{
     text-align: center;
 }
 
+/* .header { */
+    /* position: relative; */
+    /* display: block; */
+    /* background-color: #0F101B; */
+    /* background-color: green; */
+    /* flex: 1; */
+    /* color: #ffffff; */
+    /* text-align: center; */
+    /* border-bottom: 1px solid #080A10; */
+/* }  */
+
 .header {
     position: relative;
     /* display: block; */
-    background-color: #0F101B;
-    flex: 1;
+    background-color: #1a1c30;
+    /* background-color: green; */
+    width: 100%;
+    height: 100%;
+    border-radius: 1.5rem;
+    display: flex;
     color: #ffffff;
-    text-align: center;
+    align-items: center;
     border-bottom: 1px solid #080A10;
+} 
+
+.nav-title{
+    margin: 0 auto;
 }
+
 
 .header-text {
     font-size: 20px;
@@ -41,16 +67,30 @@ html, body {
     text-align: center;
 }
 
+.history-tab{
+    display: flex;
+    position: absolute;
+    left: 20px;
+    font-size: 1.5rem;
+}
 
 .nav-links {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
+    position: absolute;
+    right: 20px;
 }
+/* .nav-links li:hover{
+    border-bottom: 2px solid white;
+} */
 
 .nav-links li {
     margin-left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .nav-links a {
@@ -65,6 +105,8 @@ html, body {
 }
 
 
+/* searching field --> */
+
 .formContainer {
     position: fixed;
     bottom: 0px;
@@ -72,58 +114,89 @@ html, body {
     width: 100%;
     background-color: #0F101B;
     color: #ffffff;
-}
-
-.bottom-textbox {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    position: fixed;
-    bottom: 10px;
-    width: 60%;
-    background-color: #080A10;
-    color: #ffffff;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 25px 25px 25px 25px;
-    padding: 0px;
-    stroke: #0F101B;
-    border: #080A10;
+} 
+/* allgood */
+
+form{
+    height: 140px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+.bottom-textbox{
+    width: 60%;
+    max-height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #080A10;
+    /* background-color: white; */
+    border-radius: 1.5rem;
+    gap: 10px;
+    margin-bottom: 20px;
+    /* border: 2px solid grey; */
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+}
 
-
-.bottom-textbox textarea {
+.textarea{
+    /* margin-top: 10px; */
+    width: 92%;
+    height: 15px;
     padding: 20px;
-    width: 100%;
-    height: 80px;
-    resize: none;
     outline: none;
+    resize: none;
     stroke: #0F101B;
     background-color: #080A10;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: large;
     overflow: auto;
     scrollbar-width: none;
+    border-radius: 1.5rem;
+    /* border: 2px solid grey; */
+    border: none;
+    color: white;
 }
 
-.bottom-textbox button-container {
-    display: flex; /* Enable flexbox for buttons */
-    gap: 10px; /* Add spacing between buttons */
-    align-items: end; /* Center buttons vertically */
-    justify-content: flex-end; /* Align buttons to the right */
-    width: 25%; /* Adjust width to fit buttons */
-    padding-right: 10px; /* Add padding to the right */
+.below-search{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    /* margin-bottom: 5px; */
 }
+
+.chat-bots-buttons{
+    margin-left: 15px;
+    display: flex;
+    gap: 10px
+}
+
+img{
+    height: 30px;
+    width: 30px;
+    border-radius: 10px;
+    background-color: #1a1b2f;
+}
+
+.button-container {
+    margin-bottom:5px;
+    margin-right: 10px;
+}
+
 
 .btn {
     position: relative;
-    align-items: center;
     width: auto;
-    max-width: 150px;
-    padding: 10px 5%;
+    /* max-width: 150px; */
+    /* padding: 10px 5%; */
     background-color: #1a1b2f; /* Button background */
-    color: white;
+    color: grey;
     border: none;
     border-radius: 15px;
     padding: 10px 20px;
@@ -135,19 +208,30 @@ html, body {
 
 .btn:hover {
     background-color: #2a2b3f; /* Slightly lighter on hover */
+    color: white;
 }
 
+
+/* conversation field--> */
 .convo{
     display: flex;
-    width: 90%;
+    width: 60%;
     flex-direction: column;
     gap: 10px;
     margin: 0 auto;
     padding: 10px;
     border-radius: 9px;
-    border-bottom: 20%;
+    /* border-bottom: 20%; */
     overflow-y: auto;
     scrollbar-width: none;
+    /* max-height: calc(100vh-140px-100px); */
+
+    position: absolute;  /* Keeps it positioned relative to viewport */
+    top: 85px;  /* Adjust based on your navbar height */
+    bottom: 140px; /* Prevents it from overlapping formContainer */
+    left: 50%; 
+    transform: translateX(-50%); /* Centers it horizontally */
+    max-height: calc(100vh - 220px);
 }
 
 /* Hide scrollbar for Webkit browsers (Chrome, Edge, Safari) */
@@ -162,7 +246,8 @@ html, body {
     padding-left: 10%;
     align-self: flex-start; /* Align to the left side of the screen */
     display: flex;
-    max-width: 45%;
+    /* max-width: 45%; */
+    max-width: 80%;
     width: fit-content;
     margin: 0;
     padding: 10px;
@@ -179,7 +264,8 @@ html, body {
     display: flex;
     padding-right: 10%;
     align-self: flex-end; /* Align to the right side of the screen */
-    max-width: 45%;
+    /* max-width: 45%; */
+    max-width: 80%;
     width: fit-content;
     margin: 0;
     padding: 10px;
@@ -190,3 +276,131 @@ html, body {
     word-wrap: break-word; /* Ensure long words break to the next line */
 }
 
+
+
+/* media queries --> */
+
+@media screen and (max-width: 600px) {
+    /* .navbar { */
+        /* flex-direction: column; */
+        /* text-align: center; */
+        /* padding: 10px; */
+    /* } */
+
+    .header{
+        padding: 5px;
+    }
+
+    .nav-links li {
+        margin: 5px 0;
+    }
+
+    .nav-links li i{
+        display: block;
+    }
+
+    .nav-links li p{
+        display: none;
+    }
+
+    .convo {
+        width: 90%; /* Reduce width for better mobile view */
+    }
+
+    .bottom-textbox {
+        width: 90%; /* Reduce input field width */
+        gap: 5px;
+    }
+
+    .textarea {
+        width: 84%;
+        padding: 15px;
+        font-size: medium;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .query-container,
+    .response-container {
+        max-width: 90%; /* Allow more space for messages */
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    /* .header {
+        flex-direction: column;
+         text-align: center; 
+    } */
+
+    .convo {
+        width: 75%; /* Adjust chat width */
+    }
+
+    .bottom-textbox {
+        width: 75%;
+    }
+
+    .textarea {
+        font-size: 16px;
+    }
+
+    .btn {
+        font-size: 1rem;
+    }
+}
+
+
+@media screen and (min-width: 1025px) {
+    .convo {
+        width: 60%;
+    }
+
+    .bottom-textbox {
+        width: 60%;
+    }
+}
+
+.history-tab-div {
+    position: absolute;
+    width: 250px;
+    height: 97vh;
+    background-color: #1a1b2f;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+    transition: left 0.4s ease-in-out;
+}
+
+.history-tab-div nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid black;
+}
+
+.history-tab-div nav button{
+    background-color: #1a1b2f;
+    color: white;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    border: none;
+    margin-top: 4px;
+}
+
+.sidebar-content-div{
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.085);
+    height: 5%;
+    display: flex;
+    /* justify-content: center; */
+    text-indent: 10px;
+    align-items: center;
+}

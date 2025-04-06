@@ -1,4 +1,4 @@
-body {
+/* body {
     background-color: #0f101b;
     font-family: Arial, sans-serif;
     margin: 0;
@@ -16,9 +16,9 @@ body {
 }
 
 .header {
-    display: block; /* Change to block to stack elements vertically */
-    text-align: center; /* Center-align the text */
-    margin-bottom: 20px; /* Add spacing below the header */
+    display: block; 
+    text-align: center; 
+    margin-bottom: 20px; 
     margin-right: 20px;
 }
 
@@ -84,4 +84,206 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
     background-color: #d18e00;
+}
+
+
+
+@media screen and (max-width: 600px) {
+    body{
+        flex-direction: column;
+    }
+
+    .navbar{
+        margin-bottom: 0px;
+    }
+
+    form{
+        max-width: 300px;
+    }
+} */
+
+body {
+    background-color: #0f101b;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+}
+
+.main{
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.navbar {
+    /* background-color: #0f101b; */
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Ensures navbar doesn’t shrink */
+    max-width: 250px; /* Adjust as needed */
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.header {
+    display: block; /* Change to block to stack elements vertically */
+    text-align: center; /* Center-align the text */
+    margin-bottom: 20px; /* Add spacing below the header */
+    margin-right: 20px;
+}
+
+.header-text {
+    font-size: 40px;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.header-text:hover {
+    /* color: #f0a500; */
+    color: #f0a500;
+}
+
+form {
+    background-color: #1a1b2e;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    /* max-width: 400px; */
+    width: 400px;
+}
+
+.welcome-div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.formItems {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+label {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+input[type="email"],
+input[type="text"],
+input[type="password"] {
+    margin-top: 8px;
+    width: 96%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border: 2px solid #f0a500;
+}
+
+input[type="submit"] {
+    background-color: #f0a500;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #d18e00;
+}
+
+
+.submit-field{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.submit-field a{
+    position: absolute;
+    right: 10px;
+    max-width: 100px;
+    color: rgb(58, 129, 230) ;
+    text-decoration: none;
+}
+
+.submit{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media screen and (max-width: 750px) {
+    form{
+        width: 300px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .main{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header{
+        margin-bottom: 0px;
+    }
+    
+    .header-text:hover {
+        color: #f0a500;
+        /* color: #100E09; */
+    }
+    
+    .navbar{
+        margin-bottom: 0px;
+        background-color: #0f101b;
+        padding: 0px;
+    }
+
+    form{
+        max-width: 300px;
+        border-radius: 10px;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    .main{
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar{
+        margin-bottom: 0px;
+    }
+
+    form{
+        max-width: 260px;
+    }
+
+    .submit-field a{
+        right: 0px;
+        font-size: 0.8rem;
+        max-width: 80px;
+    }
 }
