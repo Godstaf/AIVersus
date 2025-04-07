@@ -367,6 +367,7 @@ img{
 .history-tab-div {
     position: absolute;
     width: 250px;
+    left: -250px;
     height: 97vh;
     background-color: #1a1b2f;
     color: white;
@@ -374,7 +375,11 @@ img{
     padding: 10px;
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
     z-index: 1000;
-    transition: left 0.4s ease-in-out;
+    transition: left 0.4s ease; 
+}
+
+.history-tab-div.visible {
+    left: 0;
 }
 
 .history-tab-div nav{
