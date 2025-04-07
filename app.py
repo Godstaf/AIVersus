@@ -1,6 +1,7 @@
 from flask import *
 from google import genai
 import mysql.connector as my
+import hashlib
 
 app = Flask(__name__)
 
@@ -58,24 +59,66 @@ def query_page():
     # return {"response": response.results[0].content}
     # return {"response": qry} 
     
-@app.route("/registerit", methods=["POST", "GET"])
+    
+    
+    
+    
+@app.route("/registerit", methods=["POST"])
 def registerit():
-    pass
-    # password = request.form.get("password")
-    # if password.isspace():
-    #     return False
+    # Get form data
+    password = request.form.get("password")
+    emailId = request.form.get("email")
+    name = request.form.get("name")
+
+    # Validate inputs
+    if not password or password.isspace():
+        return jsonify({"status": "error", "message": "Password cannot be empty or whitespace"}), 400
+    elif len(password) < 8:
+        return jsonify({"status": "error", "message": "Password must be at least 8 characters long"}), 400
+    elif not password.isalnum():
+        return jsonify({"status": "error", "message": "Password must be alphanumeric"}), 400
+
+    # Hash the password using SHA-256
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    print("Hashed password: ", hashed_password)
+
+    # Validate email and name
+    if not emailId or not name:
+        return jsonify({"status": "error", "message": "Email and Name cannot be empty"}), 400
+
+    try:
+        # Create the table if it doesn't exist
+        cr.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user (
+                name VARCHAR(200), 
+                email VARCHAR(500), 
+                password VARCHAR(10240),
+                PRIMARY KEY (email)
+            )
+            """
+        )
+
+        # Use parameterized query to insert data
+        query = "INSERT INTO user (name, email, password) VALUES (%s, %s, %s)"
+        values = (name, emailId, hashed_password)
+        cr.execute(query, values)
+
+        # Commit the transaction to save changes
+        mycon.commit()
+
+        print("User registered successfully!")
+        return jsonify({"status": "success", "message": "User registered successfully!"}), 200
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "error", "message": "An error occurred while registering the user"}), 500
     
-    # elif len(password) < 8:
-    #     return False
-    
-    
-    # emailId = request.form.get("email")
-    # name = request.form.get("name")
-    
-    # cr.execute("CREATE TABLE IF NOT EXISTS user (name VARCHAR(100), email VARCHAR(50), password VARCHAR(50))")
+
     
     
 
+    
     
 
 if __name__ == "__main__":
