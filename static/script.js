@@ -63,7 +63,10 @@ document.getElementById("qry").addEventListener("keydown", function (event) {
 document.querySelector(".history-tab").addEventListener("click", () => {
   let existingSideTab = document.querySelector(".history-tab-div");
 
-  if (existingSideTab) return;
+  if (existingSideTab) {
+    existingSideTab.classList.toggle("visible");
+    return;
+  }
   
   let sideTab = document.createElement("div");
   sideTab.classList.add("history-tab-div");
@@ -86,7 +89,14 @@ document.querySelector(".history-tab").addEventListener("click", () => {
   sideTab.appendChild(contentdiv);
   document.body.appendChild(sideTab);
 
-    removeIcon.addEventListener("click", ()=>{
+  setTimeout(() => {
+    sideTab.classList.add("visible");
+  }, 10);
+
+  removeIcon.addEventListener("click", () => {
+    sideTab.classList.remove("visible");
+    setTimeout(() => {
       sideTab.remove();
-    })
+    }, 300);
+  });
 });
