@@ -18,7 +18,7 @@
       </div>
     </nav>
   
-    <form action="{{ url_for('registerit') }}" method="post">
+    <form action="{{ url_for('loginit') }}" method="post">
       <div class="welcome-div">
         <p>Welcome Back!</p>
       </div>
@@ -44,5 +44,6 @@
       </div>
     </form>
   </div>
+  <script src="{{ url_for('static', filename='scriptLogin.js') }}"></script>
 </body>
 </html>

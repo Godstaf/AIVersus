@@ -2,8 +2,20 @@ from flask import *
 from google import genai
 import mysql.connector as my
 import hashlib
+import os
+import pymongo
+
+# client = pymongo.MongoClient("mongodb://localhost:27017")
+# db = client["AIVersus"]
+# collection = db["ChatHistory"]
+
+
+
+
+
 
 app = Flask(__name__)
+app.secret_key = str(os.urandom(24))  # Generate a random secret key for session management
 
 # Connect to MySQL database
 pwrd = "krish113838G"
@@ -49,7 +61,8 @@ def query_page():
     print("\n\n", qry, "\n\n")
     client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
     response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=[qry]
+        model="gemini-2.0-flash", 
+        contents=[qry]
     )
     print("\n\n", response.text, "\n\n")
     # print("\n\n", response, "\n\n")
@@ -117,9 +130,45 @@ def registerit():
 
     
     
+@app.route("/loginit", methods=["POST"])
+def loginit():
+    # Get form data
+    emailId = request.form.get("email")
+    password = request.form.get("password")
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    query = "SELECT * FROM user WHERE email = %s AND password = %s"
+    values = (emailId, hashed_password)
+    cr.execute(query, values)
+    result = cr.fetchone()
+    # fetch name from database
+    usrName = result[0] 
+    print(result)
+    if result:
+        session["userEmail"] = emailId  # Store email in session
+        session["userName"] = usrName.split()[0] # Store name in session
+        return jsonify({"status": "success", "message": "Login successful!"}), 200
+    else:
+        return jsonify({"status": "error", "message": "Invalid email or password"}), 401
 
-    
-    
+
+
+@app.route("/get_user", methods=["GET"])
+def get_user():
+    email = session.get("userEmail")
+    name = session.get("userName")
+    if email:
+        return jsonify({"status": "success", "email": email, "name": name}), 200
+    else:
+        return jsonify({"status": "error", "message": "No user logged in"}), 401
+
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.pop("userEmail", None)  # Remove email from session
+    session.pop("userName", None)   # Remove name from session
+    return jsonify({"status": "success", "message": "Logged out successfully!"}), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
