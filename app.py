@@ -5,9 +5,11 @@ import hashlib
 import os
 import pymongo
 
-# client = pymongo.MongoClient("mongodb://localhost:27017")
-# db = client["AIVersus"]
-# collection = db["ChatHistory"]
+uri = 'mongodb://udta:aiversus@ac-gbj3x7l-shard-00-00.hflvlqb.mongodb.net:27017,ac-gbj3x7l-shard-00-01.hflvlqb.mongodb.net:27017,ac-gbj3x7l-shard-00-02.hflvlqb.mongodb.net:27017/?replicaSet=atlas-3gkg9p-shard-0&ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Aiversus'
+client = pymongo.MongoClient(uri)
+db = client["Chats"]
+collection = db["Chats1"]
+
 
 
 
@@ -58,6 +60,7 @@ def login_page():
 @app.route("/query", methods=["POST"])
 def query_page():
     qry = request.form.get("Query")
+    email = session.get("email")
     print("\n\n", qry, "\n\n")
     client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
     response = client.models.generate_content(
@@ -67,14 +70,30 @@ def query_page():
     print("\n\n", response.text, "\n\n")
     # print("\n\n", response, "\n\n")
     
+
+    user_doc = collection.find_one({"email": email})
+        
+    if user_doc:
+            # Update existing user document with new chat
+            collection.update_one(
+                {"email": email},
+                {"$push": {
+                    "queries": qry,
+                    "responses": response.text
+                }}
+            )
+    else:
+            # Create new document for this user
+            collection.insert_one({
+                "email": email,
+                "queries": [qry],
+                "responses": [response.text]
+            })
+    
     return{"response": response.text}
     
     # return {"response": response.results[0].content}
     # return {"response": qry} 
-    
-    
-    
-    
     
 @app.route("/registerit", methods=["POST"])
 def registerit():
