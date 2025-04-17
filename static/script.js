@@ -174,6 +174,15 @@ async function main() {
     const formData = new FormData(this); // Get form data
     const queryUrl = this.getAttribute("data-query-url"); // Get the query URL from the form attribute
     document.getElementById("qry").value = ""; // Clear the input field
+
+
+    sendBtn = document.querySelector(".btn-search");
+    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    sendBtn.disabled = true;
+
+    const inputField = document.getElementById("qry");
+    inputField.disabled = true; // Disable the input field to prevent Enter key submission
+
     // Add the response to the .convo div
     try {
       let response = await fetch(queryUrl, {
@@ -190,6 +199,13 @@ async function main() {
       newDiv.className = "response-container";
       newDiv.innerText = response.response; // Set the response text
       convoDiv.appendChild(newDiv); // Append the new div to .convo
+
+
+      // Re-enable the send button and Enter key
+      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+      sendBtn.disabled = false;
+      inputField.disabled = false; // Re-enable the input field
+
 
 
     } catch (error) {
