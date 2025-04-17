@@ -5,10 +5,18 @@ import hashlib
 import os
 import pymongo
 
-uri = 'mongodb://udta:aiversus@ac-gbj3x7l-shard-00-00.hflvlqb.mongodb.net:27017,ac-gbj3x7l-shard-00-01.hflvlqb.mongodb.net:27017,ac-gbj3x7l-shard-00-02.hflvlqb.mongodb.net:27017/?replicaSet=atlas-3gkg9p-shard-0&ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Aiversus'
+uri = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(uri)
-db = client["Chats"]
-collection = db["Chats1"]
+db = client["AIVersus"]
+collection = db["ChatHistory"]
+
+# checking if mongodb connection is established
+try:
+    client.admin.command('ping')
+    print("MongoDB connection established.")
+except Exception as e:
+    print("MongoDB connection failed:", e)
+    exit(0)
 
 
 
@@ -60,7 +68,7 @@ def login_page():
 @app.route("/query", methods=["POST"])
 def query_page():
     qry = request.form.get("Query")
-    email = session.get("email")
+    email = session.get("userEmail")
     print("\n\n", qry, "\n\n")
     client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
     response = client.models.generate_content(
@@ -70,25 +78,26 @@ def query_page():
     print("\n\n", response.text, "\n\n")
     # print("\n\n", response, "\n\n")
     
-
-    user_doc = collection.find_one({"email": email})
-        
-    if user_doc:
-            # Update existing user document with new chat
-            collection.update_one(
-                {"email": email},
-                {"$push": {
-                    "queries": qry,
-                    "responses": response.text
-                }}
-            )
-    else:
-            # Create new document for this user
-            collection.insert_one({
-                "email": email,
-                "queries": [qry],
-                "responses": [response.text]
-            })
+    if(email is not None):
+        # Check if user document exists in MongoDB  
+        user_doc = collection.find_one({"email": email})
+            
+        if user_doc:
+                # Update existing user document with new chat
+                collection.update_one(
+                    {"email": email},
+                    {"$push": {
+                        "queries": qry,
+                        "responses": response.text
+                    }}
+                )
+        else:
+                # Create new document for this user
+                collection.insert_one({
+                    "email": email,
+                    "queries": [qry],
+                    "responses": [response.text]
+                })
     
     return{"response": response.text}
     
