@@ -1,6 +1,10 @@
+Got it! Here's an updated `README.md` file tailored to your **AI chat app**, which runs locally and uses your specified tech stack—JavaScript, HTML/CSS for the frontend, Python for the backend, and MongoDB/MySQL for databases.
+
+---
+
 # 🤖 AIversus: Local AI Chat Application
 
-**AIversus** is a locally-hosted(for now) AI chat application that allows users to interact with artificial intelligence in real-time. Built with a lightweight tech stack and designed for efficient local use, AIversus is the perfect sandbox environment for experimenting with conversational AI capabilities.
+**AIversus** is a locally-hosted AI chat application that allows users to interact with artificial intelligence in real-time. Built with a lightweight tech stack and designed for efficient local use, AIversus is the perfect sandbox environment for experimenting with conversational AI capabilities.
 
 ---
 
@@ -17,9 +21,9 @@
 ## 🏗️ Tech Stack
 
 - **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Python (Flask)
+- **Backend**: Python (Flask/FastAPI/Django)
 - **Databases**: MongoDB (NoSQL) and MySQL (Relational)
-- **AI Framework**: Gemini(GenAI)
+- **AI Framework**: OpenAI API or custom models
 - **Hosting**: Localhost
 
 ---
@@ -53,11 +57,37 @@ Follow these steps to run the AIversus project locally:
 - Node.js (for JavaScript dependencies, if needed)
 - MongoDB and MySQL installed on your system
 
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/Godstaf/AIVersus.git
+cd aiversus
+```
+### Step 2: Set Up the Backend
+
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Set environment variables for MongoDB and MySQL in a `.env` file:
+   ```env
+   MONGO_URI="mongodb://localhost:27017/your_database_name"
+   MYSQL_USER="your_mysql_user"
+   MYSQL_PASSWORD="your_mysql_password"
+   MYSQL_DB="your_mysql_db_name"
+   ```
+3. Start the backend server:
+   ```bash
+   python app.py
+   ```
+
+### Step 4: Connect Databases
+- Ensure MongoDB and MySQL are running locally, and the schemas are correctly configured as per `database/` scripts.
+
+---
 
 ## 🤝 Contributing
 
 Contributions are always welcome! Fork the repo, make your changes, and submit a pull request for review.
-Feel free to reach out to us by Email!!!
 
 ---
 
@@ -66,3 +96,5 @@ Feel free to reach out to us by Email!!!
 This project is licensed under the **MIT License**. Feel free to use, modify, and distribute it.
 
 ---
+
+Let me know if you'd like further adjustments or additions to the README! 🚀
