@@ -19,11 +19,6 @@ except Exception as e:
     exit(0)
 
 
-
-
-
-
-
 app = Flask(__name__)
 app.secret_key = str(os.urandom(24))  # Generate a random secret key for session management
 
@@ -55,6 +50,28 @@ cr.execute("USE AIVersus")
 def index():
     return render_template("index.html")
 
+
+
+
+@app.route("/get_chat_history", methods=["GET"])
+def get_chat_history():
+    email = session.get("userEmail")
+    if not email:
+        return jsonify({"status": "error", "message": "User not logged in"}), 401
+
+    # Fetch chat history from MongoDB
+    user_doc = collection.find_one({"email": email})
+    if user_doc:
+        return jsonify({
+            "status": "success",
+            "queries": user_doc.get("queries", []),
+            "responses": user_doc.get("responses", [])
+        }), 200
+    else:
+        return jsonify({"status": "error", "message": "No chat history found"}), 404
+    
+    
+    
 
 @app.route("/register", methods=["POST", "GET"])
 def register_page():
@@ -99,7 +116,7 @@ def query_page():
                     "responses": [response.text]
                 })
     
-    return{"response": response.text}
+    return{"response": response.text}   
     
     # return {"response": response.results[0].content}
     # return {"response": qry} 

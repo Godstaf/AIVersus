@@ -96,6 +96,43 @@ async function main() {
   // -->loggen In
 
   else {
+
+    async function loadChatHistory() {
+      try {
+        const response = await fetch("/get_chat_history");
+        const result = await response.json();
+
+        if (response.status === 200) {
+          const convoDiv = document.querySelector(".convo");
+          convoDiv.innerHTML = ""; // Clear existing chat
+
+          // Display queries and responses
+          const queries = result.queries || [];
+          const responses = result.responses || [];
+          for (let i = 0; i < queries.length; i++) {
+            const queryDiv = document.createElement("div");
+            queryDiv.className = "query-container";
+            queryDiv.innerText = queries[i];
+            convoDiv.appendChild(queryDiv);
+
+            const responseDiv = document.createElement("div");
+            responseDiv.className = "response-container";
+            responseDiv.innerText = responses[i];
+            convoDiv.appendChild(responseDiv);
+          }
+        } else {
+          console.error("Error loading chat history:", result.message);
+        }
+      } catch (error) {
+        console.error("Error fetching chat history:", error);
+      }
+    }
+
+    // Call loadChatHistory after successful login
+    if (u_email !== null) {
+      loadChatHistory();
+    }
+
     document.querySelector(".profile").addEventListener("click", () => {
       let profBtn = document.querySelector(".profile");
       let existingProfileTab = document.querySelector(".main-profile-tab");
@@ -178,20 +215,20 @@ async function main() {
 
     sendBtn = document.querySelector(".btn-search");
     sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    sendBtn.disabled = true;
+    sendBtn.disabled = true;  
 
     const inputField = document.getElementById("qry");
     inputField.disabled = true; // Disable the input field to prevent Enter key submission
 
     // Add the response to the .convo div
     try {
-      let response = await fetch(queryUrl, {
+      const apiCall = await fetch(queryUrl, {
         method: "POST",
         body: formData,
       });
-      response = await response.json(); // Get the response text
-
-      console.log('Response:', response.response); // Log the response for debugging
+      const response = await apiCall.json(); // Get the response text
+      const output = response.response;
+      console.log('Response:',output ); // Log the response for debugging
       // alert(x.response) 
 
       const convoDiv = document.querySelector(".convo");
