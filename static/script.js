@@ -265,51 +265,21 @@ async function main() {
     }
   });
 
-  // let sideBar = document.querySelector(".history-tab").addEventListener("click", ()=>{
-  //   let sideTab = document.createElement("div");
-  //   sideTab.classList.add("history-tab-div");
-  //   sideBar.appendChild(sideTab);
-  // })
-
   document.querySelector(".history-tab").addEventListener("click", () => {
-    let existingSideTab = document.querySelector(".history-tab-div");
+    let sideTab = document.querySelector(".history-tab-div");
 
-    if (existingSideTab) {
-      existingSideTab.classList.toggle("visible");
-      return;
-    }
-
-    let sideTab = document.createElement("div");
-    sideTab.classList.add("history-tab-div");
-
-    let removeIcon = document.createElement("button");
-    removeIcon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
-
-    let nav = document.createElement("nav");
-    let navText = document.createElement("h3");
-    navText.innerHTML = `History`;
-
-
-    let contentdiv = document.createElement("div");
-    contentdiv.classList.add("sidebar-content-div");
-    contentdiv.innerText = "Simple Conversation"
-
-    sideTab.appendChild(nav);
-    nav.appendChild(navText);
-    nav.appendChild(removeIcon);
-    sideTab.appendChild(contentdiv);
-    document.body.appendChild(sideTab);
-
+    const removeIcon = document.querySelector(".rmvIc0");
+    
     setTimeout(() => {
-      sideTab.classList.add("visible");
-    }, 10);
+      sideTab.classList.add("visible", true); //force add
+    }, 100);
 
     removeIcon.addEventListener("click", () => {
-      sideTab.classList.remove("visible");
       setTimeout(() => {
-        sideTab.remove();
+        sideTab.classList.toggle("visible", false); //force remove
       }, 300);
     });
+
   });
 
 }
