@@ -102,6 +102,7 @@ async function main() {
         const response = await fetch("/get_chat_history");
         const result = await response.json();
 
+        // Check if the response is successful
         if (response.status === 200) {
           const convoDiv = document.querySelector(".convo");
           convoDiv.innerHTML = ""; // Clear existing chat
@@ -315,14 +316,4 @@ async function main() {
 }
 
 main();
-
-
-
-
-
-
-
-
-
-
 
