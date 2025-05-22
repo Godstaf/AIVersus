@@ -60,7 +60,51 @@
     </form>
   </div>
   
+  <div class="history-tab-div">
+    <nav>
+      <h3>History</h3>
+      <button class="rmvIc0"><i class="fa-solid fa-xmark"></i></button>
+    </nav>
+    <div class="sidebar-content-div">Simple Conversation</div>
+  </div>
+
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
+
+<!-- 
+.history-tab-div {
+    position: absolute;
+    width: 250px;
+    left: -250px;
+    height: 97vh;
+    background-color: #1a1b2f;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+    transition: left 0.4s ease; 
+}
+
+.history-tab-div.visible {
+    left: 0; /* Slide into view */
+}
+
+.history-tab-div nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid black;
+}
+
+.history-tab-div nav button{
+    background-color: #1a1b2f;
+    color: white;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    border: none;
+    margin-top: 4px;
+}
+-->

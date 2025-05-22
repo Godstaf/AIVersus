@@ -343,7 +343,7 @@ img{
 .history-tab-div {
     position: absolute;
     width: 250px;
-    left: -250px;
+    left: -300px;
     height: 97vh;
     background-color: #1a1b2f;
     color: white;
