@@ -245,6 +245,15 @@ img{
     word-wrap: break-word; /* Ensure long words break to the next line */
 }
 
+.error-div{
+    background-color: rgba(255, 0, 0, 0.288);
+    border: 2px solid rgba(255, 0, 0, 0.582);
+    display: block;
+}
+
+.error-div i{
+    margin-right: 5px;
+}
 
 /* This is the CSS for the query container, which is used to display the user's query in a styled box on the right side of the screen. */
 .query-container {
