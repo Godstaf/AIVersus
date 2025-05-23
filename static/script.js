@@ -248,7 +248,19 @@ async function main() {
 
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+      // alert("An error occurred. Please try again.");
+      let ErrorDiv = document.createElement('div');
+      ErrorDiv.classList.add('error-div');
+      ErrorDiv.classList.add('response-container');
+
+      ErrorDiv.innerHTML = `
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        An error occurred. Please try again.
+      `;
+      convoDiv.appendChild(ErrorDiv);
+      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+      sendBtn.disabled = false;
+      inputField.disabled = false;
     }
   });
 
@@ -278,9 +290,8 @@ async function main() {
     removeIcon.addEventListener("click", () => {
       setTimeout(() => {
         sideTab.classList.toggle("visible", false); //force remove
-      }, 300);
+      }, 100);
     });
-
   });
 
 }
