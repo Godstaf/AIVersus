@@ -62,10 +62,10 @@ def get_chat_history():
     # Fetch chat history from MongoDB
     user_doc = collection.find_one({"email": email})
     if user_doc:
-        return jsonify({
+        return jsonify({    
             "status": "success",
             "queries": user_doc.get("queries", []),
-            "responses": user_doc.get("responses", [])
+            "responses": user_doc.get("responses", [])  
         }), 200
     else:
         return jsonify({"status": "error", "message": "No chat history found"}), 404
