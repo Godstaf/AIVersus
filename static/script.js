@@ -277,9 +277,8 @@ async function main() {
     removeIcon.addEventListener("click", () => {
       setTimeout(() => {
         sideTab.classList.toggle("visible", false); //force remove
-      }, 300);
+      }, 100);
     });
-
   });
 
 }

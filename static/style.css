@@ -374,6 +374,13 @@ img{
     margin-top: 4px;
 }
 
+.new-chat{
+    text-decoration: none;
+    color: inherit;
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+
 .sidebar-content-div{
     margin-top: 10px;
     width: 100%;
