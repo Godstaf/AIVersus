@@ -21,8 +21,6 @@ except Exception as e:
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(24))  # Generate a random secret key for session management
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
-session.permanent = True
 
 # Connect to MySQL database
 pwrd = "krish113838G"
@@ -196,6 +194,7 @@ def loginit():
         return jsonify({"status": "success", "message": "Login successful!"}), 200
     else:
         return jsonify({"status": "error", "message": "Invalid email or password"}), 401
+
 
 
 
