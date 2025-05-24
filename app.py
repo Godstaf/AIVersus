@@ -1,4 +1,4 @@
-from flask import *
+from flask import Flask, render_template, request, jsonify, session
 from google import genai
 import mysql.connector as my
 import hashlib
@@ -21,8 +21,7 @@ except Exception as e:
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(24))  # Generate a random secret key for session management
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
-session.permanent = True
+
 
 # Connect to MySQL database
 pwrd = "krish113838G"
@@ -54,7 +53,6 @@ def index():
 
 
 
-
 @app.route("/get_chat_history", methods=["GET"])
 def get_chat_history():
     email = session.get("userEmail")
@@ -62,12 +60,12 @@ def get_chat_history():
         return jsonify({"status": "error", "message": "User not logged in"}), 401
 
     # Fetch chat history from MongoDB
-    user_doc = collection.find_one({"email": email})
+    user_doc = list(collection.find({"email": email}))  # Convert cursor to list
     if user_doc:
         return jsonify({    
             "status": "success",
-            "queries": user_doc.get("queries", []),
-            "responses": user_doc.get("responses", [])  
+            "queries": user_doc[0].get("queries", []),
+            "responses": user_doc[0].get("responses", [])  
         }), 200
     else:
         return jsonify({"status": "error", "message": "No chat history found"}), 404
@@ -100,7 +98,7 @@ def query_page():
     if(email is not None):
         # Check if user document exists in MongoDB  
         user_doc = collection.find_one({"email": email})
-            
+
         if user_doc:
                 # Update existing user document with new chat
                 collection.update_one(
@@ -182,17 +180,22 @@ def loginit():
     # Get form data
     emailId = request.form.get("email")
     password = request.form.get("password")
+    if password is None:
+        # Handle the error, e.g., return an error message
+        return jsonify({"status": "error", "message": "Password cannot be empty"}), 401
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     query = "SELECT * FROM user WHERE email = %s AND password = %s"
     values = (emailId, hashed_password)
     cr.execute(query, values)
     result = cr.fetchone()
     # fetch name from database
+    if result is None:
+        return jsonify({"status": "error", "message": "Invalid email or password"}), 401
     usrName = result[0] 
     print(result)
     if result:
         session["userEmail"] = emailId  # Store email in session
-        session["userName"] = usrName.split()[0] # Store name in session
+        session["userName"] = str(usrName).split()[0] if usrName else ""  # Ensure usrName is a string and handle None
         return jsonify({"status": "success", "message": "Login successful!"}), 200
     else:
         return jsonify({"status": "error", "message": "Invalid email or password"}), 401
