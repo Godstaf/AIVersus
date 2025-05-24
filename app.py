@@ -53,7 +53,6 @@ def index():
 
 
 
-
 @app.route("/get_chat_history", methods=["GET"])
 def get_chat_history():
     email = session.get("userEmail")
