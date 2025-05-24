@@ -108,8 +108,8 @@ async function main() {
           convoDiv.innerHTML = ""; // Clear existing chat
 
           // Display queries and responses
-          const queries = result.queries || [];
-          const responses = result.responses || [];
+          const queries = result.queries || []; // Default to empty array if not present
+          const responses = result.responses || []; // Default to empty array if not present
           for (let i = 0; i < queries.length; i++) {
             const queryDiv = document.createElement("div");
             queryDiv.className = "query-container";
@@ -118,8 +118,8 @@ async function main() {
 
             const responseDiv = document.createElement("div");
             responseDiv.className = "response-container";
-            responseDiv.innerText = responses[i];
-            convoDiv.appendChild(responseDiv);
+            responseDiv.innerText = responses[i] || "No response"; // Default to "No response" if not present
+            convoDiv.appendChild(responseDiv); // Append the response div after the query div
           }
         } else {
           console.error("Error loading chat history:", result.message);
@@ -216,7 +216,7 @@ async function main() {
 
     sendBtn = document.querySelector(".btn-search");
     sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    sendBtn.disabled = true;  
+    sendBtn.disabled = true;
 
     const inputField = document.getElementById("qry");
     inputField.disabled = true; // Disable the input field to prevent Enter key submission
@@ -229,7 +229,7 @@ async function main() {
       });
       const response = await apiCall.json(); // Get the response text
       const output = response.response;
-      console.log('Response:',output ); // Log the response for debugging
+      console.log('Response:', output); // Log the response for debugging
       // alert(x.response) 
 
       const convoDiv = document.querySelector(".convo");
@@ -281,13 +281,13 @@ async function main() {
   document.querySelector(".history-tab").addEventListener("click", () => {
     let sideTab = document.querySelector(".history-tab-div");
 
-    const removeIcon = document.querySelector(".rmvIc0");
-    
     setTimeout(() => {
       sideTab.classList.add("visible", true); //force add
     }, 100);
 
-    removeIcon.addEventListener("click", () => {
+
+
+    document.querySelector(".rmvIc0").addEventListener("click", () => {
       setTimeout(() => {
         sideTab.classList.toggle("visible", false); //force remove
       }, 100);
