@@ -53,6 +53,50 @@ def index():
 
 
 
+@app.route("/new_chat", methods=["POST"])
+def new_chat():
+    email = session.get("userEmail")
+    if not email:
+        return jsonify({"status": "error", "message": "User not logged in"}), 401
+    # Create a new chat history document for the user
+    collection.insert_one({
+        "email": email,
+        "queries": [],
+        "responses": []
+    })
+    
+    chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
+    
+    if chat_doc is not None:
+        session["chat_id"] = str(chat_doc["_id"])  # Store chat ID in session
+    else:
+        session["chat_id"] = None  # Or handle this case as needed
+    
+    return jsonify({"status": "success", "message": "New chat created"}), 200
+
+
+
+@app.route("/get_all_chats", methods=["GET"])
+def get_all_chats():
+    email = session.get("userEmail")
+    if not email:
+        return jsonify({"status": "error", "message": "User not logged in"}), 401
+    # Fetch all chat history for the user from MongoDB
+    user_docs = list(collection.find({"email": email}))  # Convert cursor to list
+    if user_docs:
+        return jsonify({
+            "status": "success",
+            "chats": [{
+                "chat_id": str(doc["_id"]),
+                "queries": doc.get("queries", []),
+                "responses": doc.get("responses", [])
+            } for doc in user_docs]
+        }), 200
+    else:
+        return jsonify({"status": "error", "message": "No chat history found"}), 404
+
+
+
 @app.route("/get_chat_history", methods=["GET"])
 def get_chat_history():
     email = session.get("userEmail")
@@ -61,14 +105,27 @@ def get_chat_history():
 
     # Fetch chat history from MongoDB
     user_doc = list(collection.find({"email": email}))  # Convert cursor to list
+    chatIdIndx = None
+    
+    
     if user_doc:
-        return jsonify({    
-            "status": "success",
-            "queries": user_doc[0].get("queries", []),
-            "responses": user_doc[0].get("responses", [])  
-        }), 200
+        for i in range(len(user_doc)-1, -1, -1):
+            # print(str(user_doc[i].get("_id")))
+            if str(user_doc[i].get("_id")) == session.get("chat_id"):
+                chatIdIndx = i
+                break
+
+        if chatIdIndx is not None:
+            return jsonify({    
+                "status": "success",
+                "queries": user_doc[chatIdIndx].get("queries", []),
+                "responses": user_doc[chatIdIndx].get("responses", [])  
+            }), 200
+        else:
+            return jsonify({"status": "error", "message": "No chat history found for this chat ID"}), 404
     else:
         return jsonify({"status": "error", "message": "No chat history found"}), 404
+    
     
     
     

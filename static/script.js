@@ -28,6 +28,79 @@ async function fetchUserEmail() {
 
 async function main() {
 
+  // Helper to add a new chat entry to the sidebar
+  function addChatToSidebar() {
+    const sidebarContent = document.querySelector(".sidebar-content-div");
+    const newChatDiv = document.createElement("div");
+    newChatDiv.className = "sidebar-chat-entry";
+    newChatDiv.innerText = "New Chat";
+    // Insert at the top
+    if (sidebarContent.firstChild) {
+      sidebarContent.insertBefore(newChatDiv, sidebarContent.firstChild);
+    } else {
+      sidebarContent.appendChild(newChatDiv);
+    }
+  }
+
+  async function loadChatHistory() {
+    try {
+      const response = await fetch("/get_chat_history");
+      const result = await response.json();
+
+      // Check if the response is successful
+      if (response.status === 200) {
+        const convoDiv = document.querySelector(".convo");
+        convoDiv.innerHTML = ""; // Clear existing chat
+
+        // Display queries and responses
+        const queries = result.queries || []; // Default to empty array if not present
+        const responses = result.responses || []; // Default to empty array if not present
+        for (let i = 0; i < queries.length; i++) {
+          const queryDiv = document.createElement("div");
+          queryDiv.className = "query-container";
+          queryDiv.innerText = queries[i];
+          convoDiv.appendChild(queryDiv);
+
+          const responseDiv = document.createElement("div");
+          responseDiv.className = "response-container";
+          responseDiv.innerText = responses[i] || "No response"; // Default to "No response" if not present
+          convoDiv.appendChild(responseDiv); // Append the response div after the query div
+        }
+      } else {
+        console.error("Error loading chat history:", result.message);
+      }
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+  }
+
+
+  async function createNewChat() {
+    try {
+      const response = await fetch("/new_chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: u_email })
+      });
+  
+      if (response.status === 200) {
+        console.log("New chat created successfully.");
+        addChatToSidebar();
+        loadChatHistory();
+      } else {
+        console.error("Error creating new chat:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    }
+  }
+
+
+
+
+  // Fetch user email and name
   await fetchUserEmail(); // Wait for fetchUserEmail to complete
   console.log("User email:", u_email); // Now this will log the updated value
   console.log("User name:", u_name);
@@ -96,42 +169,11 @@ async function main() {
   // -->loggen In
 
   else {
-
-    async function loadChatHistory() {
-      try {
-        const response = await fetch("/get_chat_history");
-        const result = await response.json();
-
-        // Check if the response is successful
-        if (response.status === 200) {
-          const convoDiv = document.querySelector(".convo");
-          convoDiv.innerHTML = ""; // Clear existing chat
-
-          // Display queries and responses
-          const queries = result.queries || []; // Default to empty array if not present
-          const responses = result.responses || []; // Default to empty array if not present
-          for (let i = 0; i < queries.length; i++) {
-            const queryDiv = document.createElement("div");
-            queryDiv.className = "query-container";
-            queryDiv.innerText = queries[i];
-            convoDiv.appendChild(queryDiv);
-
-            const responseDiv = document.createElement("div");
-            responseDiv.className = "response-container";
-            responseDiv.innerText = responses[i] || "No response"; // Default to "No response" if not present
-            convoDiv.appendChild(responseDiv); // Append the response div after the query div
-          }
-        } else {
-          console.error("Error loading chat history:", result.message);
-        }
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    }
-
     // Call loadChatHistory after successful login
     if (u_email !== null) {
-      loadChatHistory();
+      console.log("User is logged in with email:", u_email);
+      createNewChat(); // Create a new chat when the user logs in
+
     }
 
     document.querySelector(".profile").addEventListener("click", () => {
@@ -280,18 +322,21 @@ async function main() {
 
   document.querySelector(".history-tab").addEventListener("click", () => {
     let sideTab = document.querySelector(".history-tab-div");
+    sideTab.classList.add("visible", true);
+  });
 
+  document.querySelector(".history-tab-div .new-chat").addEventListener("click", async (event) => {
+    event.preventDefault();
+    await createNewChat();
+    let sideTab = document.querySelector(".history-tab-div");
+    sideTab.classList.add("visible", true);
+  });
+
+  document.querySelector(".rmvIc0").addEventListener("click", () => {
+    let sideTab = document.querySelector(".history-tab-div");
     setTimeout(() => {
-      sideTab.classList.add("visible", true); //force add
+      sideTab.classList.toggle("visible", false);
     }, 100);
-
-
-
-    document.querySelector(".rmvIc0").addEventListener("click", () => {
-      setTimeout(() => {
-        sideTab.classList.toggle("visible", false); //force remove
-      }, 100);
-    });
   });
 
 }
