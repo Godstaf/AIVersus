@@ -285,7 +285,14 @@ async function main() {
       sideTab.classList.add("visible", true); //force add
     }, 100);
 
-
+    const newChatBtn = document.querySelector(".new-chat");
+    const chatContainer = document.querySelector(".sidebar-chats-container");
+    newChatBtn.addEventListener('click', ()=>{
+      let newChat = document.createElement('div');
+      newChat.classList.add("sidebar-content-div");
+      newChat.innerText = "New Chat";
+      chatContainer.appendChild(newChat);
+    })
 
     document.querySelector(".rmvIc0").addEventListener("click", () => {
       setTimeout(() => {

@@ -360,7 +360,9 @@ img{
     padding: 10px;
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
     z-index: 1000;
-    transition: left 0.4s ease; 
+    transition: left 0.4s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .history-tab-div.visible {
@@ -388,6 +390,16 @@ img{
     color: inherit;
     font-size: 1.2rem;
     margin-right: 5px;
+}
+
+.sidebar-chats-container{
+    width: 100%;
+    flex: 1;
+    overflow-y: scroll;
+}
+
+.sidebar-chats-container::-webkit-scrollbar{
+    width: 0;
 }
 
 .sidebar-content-div{
