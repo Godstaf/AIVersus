@@ -1,5 +1,3 @@
-Got it! Here's an updated `README.md` file tailored to your **AI chat app**, which runs locally and uses your specified tech stack—JavaScript, HTML/CSS for the frontend, Python for the backend, and MongoDB/MySQL for databases.
-
 ---
 
 # 🤖 AIversus: Local AI Chat Application
