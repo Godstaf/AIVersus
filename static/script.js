@@ -1,4 +1,3 @@
-
 var u_email = null;
 var u_name = null;
 
@@ -29,22 +28,63 @@ async function fetchUserEmail() {
 async function main() {
 
   // Helper to add a new chat entry to the sidebar
-  function addChatToSidebar() {
+  // function addChatToSidebar() {
+  //   const sidebarContent = document.querySelector(".sidebar-content-div");
+  //   const newChatDiv = document.createElement("div");
+  //   newChatDiv.className = "sidebar-chat-entry";
+  //   newChatDiv.innerText = "New Chat";j
+  //   // Insert at the top
+  //   if (sidebarContent.firstChild) {
+  //     sidebarContent.insertBefore(newChatDiv, sidebarContent.firstChild);
+  //   } else {
+  //     sidebarContent.appendChild(newChatDiv);
+  //   }
+  // }
+
+  // Helper to render all chats in the sidebar
+  async function renderSidebarChats(selectedChatId = null) {
     const sidebarContent = document.querySelector(".sidebar-content-div");
-    const newChatDiv = document.createElement("div");
-    newChatDiv.className = "sidebar-chat-entry";
-    newChatDiv.innerText = "New Chat";
-    // Insert at the top
-    if (sidebarContent.firstChild) {
-      sidebarContent.insertBefore(newChatDiv, sidebarContent.firstChild);
-    } else {
-      sidebarContent.appendChild(newChatDiv);
+    sidebarContent.innerHTML = "";
+
+    const response = await fetch("/get_all_chats");
+    const result = await response.json();
+    const chats = result.chats || [];
+
+    let anySelected = false;
+
+    chats.forEach((chat) => {
+      const chatDiv = document.createElement("div");
+      chatDiv.className = "sidebar-chat-entry";
+      chatDiv.innerText = chat.title || "New Chat";
+      chatDiv.dataset.chatId = chat.chat_id;
+
+      // Highlight if this is the selected chat
+      if (selectedChatId && chat.chat_id === selectedChatId) {
+        chatDiv.classList.add("active-chat");
+        anySelected = true;
+      }
+
+      chatDiv.addEventListener("click", function() {
+        document.querySelectorAll(".sidebar-chat-entry").forEach(e => e.classList.remove("active-chat"));
+        chatDiv.classList.add("active-chat");
+        loadChatHistory(chat.chat_id);
+      });
+
+      sidebarContent.appendChild(chatDiv);
+    });
+
+    // If no chat is selected, select and load the first one
+    const allChats = document.querySelectorAll(".sidebar-chat-entry");
+    if (allChats.length > 0 && !anySelected) {
+      allChats[0].classList.add("active-chat");
+      loadChatHistory(allChats[0].dataset.chatId);
     }
   }
 
-  async function loadChatHistory() {
+  // Update loadChatHistory to accept chat_id
+  async function loadChatHistory(chat_id) {
     try {
-      const response = await fetch("/get_chat_history");
+      const response = await fetch(`/get_chat_history?chat_id=${chat_id}`);
       const result = await response.json();
 
       // Check if the response is successful
@@ -75,6 +115,7 @@ async function main() {
   }
 
 
+  // Create a new chat and highlight it
   async function createNewChat() {
     try {
       const response = await fetch("/new_chat", {
@@ -84,11 +125,15 @@ async function main() {
         },
         body: JSON.stringify({ email: u_email })
       });
-  
+
       if (response.status === 200) {
+        const result = await response.json();
         console.log("New chat created successfully.");
-        addChatToSidebar();
-        loadChatHistory();
+        if (result.chat_id) {
+          await renderSidebarChats(result.chat_id); // Only this highlights and loads the new chat
+        } else {
+          await renderSidebarChats();
+        }
       } else {
         console.error("Error creating new chat:", await response.text());
       }
@@ -336,9 +381,11 @@ async function main() {
     let sideTab = document.querySelector(".history-tab-div");
     setTimeout(() => {
       sideTab.classList.toggle("visible", false);
-    }, 100);
+    }, 100);  
   });
 
+  // Add this line to render chats after login
+  // await renderSidebarChats();
 }
 
 main();

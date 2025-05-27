@@ -4,6 +4,7 @@ import mysql.connector as my
 import hashlib
 import os
 import pymongo
+from bson import ObjectId
 
 uri = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(uri)
@@ -58,21 +59,18 @@ def new_chat():
     email = session.get("userEmail")
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401
-    # Create a new chat history document for the user
     collection.insert_one({
         "email": email,
         "queries": [],
         "responses": []
     })
-    
     chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
-    
     if chat_doc is not None:
-        session["chat_id"] = str(chat_doc["_id"])  # Store chat ID in session
+        session["chat_id"] = str(chat_doc["_id"])
+        return jsonify({"status": "success", "message": "New chat created", "chat_id": str(chat_doc["_id"])}), 200
     else:
-        session["chat_id"] = None  # Or handle this case as needed
-    
-    return jsonify({"status": "success", "message": "New chat created"}), 200
+        session["chat_id"] = None
+        return jsonify({"status": "error", "message": "Failed to create chat"}), 500
 
 
 
@@ -100,26 +98,27 @@ def get_all_chats():
 @app.route("/get_chat_history", methods=["GET"])
 def get_chat_history():
     email = session.get("userEmail")
+    chat_id = request.args.get("chat_id")  # Get chat_id from query params
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401
 
-    # Fetch chat history from MongoDB
-    user_doc = list(collection.find({"email": email}))  # Convert cursor to list
+    if chat_id:
+        session["chat_id"] = chat_id  # Set the current chat_id in session
+
+    user_doc = list(collection.find({"email": email}))
     chatIdIndx = None
-    
-    
+
     if user_doc:
         for i in range(len(user_doc)-1, -1, -1):
-            # print(str(user_doc[i].get("_id")))
             if str(user_doc[i].get("_id")) == session.get("chat_id"):
                 chatIdIndx = i
                 break
 
         if chatIdIndx is not None:
-            return jsonify({    
+            return jsonify({
                 "status": "success",
                 "queries": user_doc[chatIdIndx].get("queries", []),
-                "responses": user_doc[chatIdIndx].get("responses", [])  
+                "responses": user_doc[chatIdIndx].get("responses", [])
             }), 200
         else:
             return jsonify({"status": "error", "message": "No chat history found for this chat ID"}), 404
@@ -127,8 +126,23 @@ def get_chat_history():
         return jsonify({"status": "error", "message": "No chat history found"}), 404
     
     
-    
-    
+
+@app.route("/delete_empty_chats", methods=["POST"])
+def delete_empty_chats():
+    email = session.get("userEmail")
+    if not email:
+        return jsonify({"status": "error", "message": "User not logged in"}), 401  
+    # Delete all chats for the user that have no queries or responses
+    result = collection.delete_many({
+        "email": email,
+        "$or": [
+            {"queries": {"$size": 0}},
+            {"responses": {"$size": 0}}
+        ]
+    })
+    return jsonify({"status": "success", "message": f"{result.deleted_count} empty chats deleted."}), 200
+
+
 
 @app.route("/register", methods=["POST", "GET"])
 def register_page():
@@ -143,37 +157,32 @@ def login_page():
 def query_page():
     qry = request.form.get("Query")
     email = session.get("userEmail")
-    print("\n\n", qry, "\n\n")
+    chat_id = session.get("chat_id")  # Get current chat_id from session
+
     client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
     response = client.models.generate_content(
         model="gemini-2.0-flash", 
         contents=[qry]
     )
-    print("\n\n", response.text, "\n\n")
-    # print("\n\n", response, "\n\n")
     
-    if(email is not None):
-        # Check if user document exists in MongoDB  
-        user_doc = collection.find_one({"email": email})
+    if email is not None and chat_id is not None:
+        # Update the correct chat document by _id
+        collection.update_one(
+            {"_id": ObjectId(chat_id)},
+            {"$push": {
+                "queries": qry,
+                "responses": response.text
+            }}
+        )
+    elif email is not None:
+        # Fallback: create new document if chat_id/session is missing
+        collection.insert_one({
+            "email": email,
+            "queries": [qry],
+            "responses": [response.text]
+        })
 
-        if user_doc:
-                # Update existing user document with new chat
-                collection.update_one(
-                    {"email": email},
-                    {"$push": {
-                        "queries": qry,
-                        "responses": response.text
-                    }}
-                )
-        else:
-                # Create new document for this user
-                collection.insert_one({
-                    "email": email,
-                    "queries": [qry],
-                    "responses": [response.text]
-                })
-    
-    return{"response": response.text}   
+    return {"response": response.text}   
     
     # return {"response": response.results[0].content}
     # return {"response": qry} 
