@@ -1,5 +1,3 @@
----
-
 # 🤖 AIversus: Local AI Chat Application
 
 **AIversus** is a locally-hosted AI chat application that allows users to interact with artificial intelligence in real-time. Built with a lightweight tech stack and designed for efficient local use, AIversus is the perfect sandbox environment for experimenting with conversational AI capabilities.
