@@ -27,7 +27,6 @@ async function fetchUserEmail() {
 
 
 async function main() {
-
   await fetchUserEmail(); // Wait for fetchUserEmail to complete
   console.log("User email:", u_email); // Now this will log the updated value
   console.log("User name:", u_name);
@@ -35,7 +34,6 @@ async function main() {
   // -->Non logged Ins
 
   if (u_email == null) {
-
     document.querySelector(".profile").addEventListener("click", () => {
       let profBtn = document.querySelector(".profile");
       let existingProfileTab = document.querySelector(".main-profile-tab");
@@ -83,20 +81,20 @@ async function main() {
       document.body.appendChild(profileTab);
 
       function handleDocumentClick(event) {
-        if (!profileTab.contains(event.target) && !profBtn.contains(event.target)) {
+        if (
+          !profileTab.contains(event.target) &&
+          !profBtn.contains(event.target)
+        ) {
           profileTab.remove();
           document.removeEventListener("click", handleDocumentClick);
         }
       }
       document.addEventListener("click", handleDocumentClick);
-    })
-
+    });
   }
 
   // -->loggen In
-
   else {
-
     async function loadChatHistory() {
       try {
         const response = await fetch("/get_chat_history");
@@ -154,10 +152,9 @@ async function main() {
       wave.classList.add("wave-user");
       wave.innerText = "Hello " + u_name + "!";
 
-
       let logOut = document.createElement("div");
       logOut.classList.add("logOut");
-      logOut.innerHTML = `Log Out <a><i class="fa-solid fa-right-from-bracket"></i></a>`
+      logOut.innerHTML = `Log Out <a><i class="fa-solid fa-right-from-bracket"></i></a>`;
 
       // Add an event listener to the logout button
       logOut.addEventListener("click", (event) => {
@@ -184,87 +181,81 @@ async function main() {
       document.body.appendChild(profileTab);
 
       function handleDocumentClick(event) {
-        if (!profileTab.contains(event.target) && !profBtn.contains(event.target)) {
+        if (
+          !profileTab.contains(event.target) &&
+          !profBtn.contains(event.target)
+        ) {
           profileTab.remove();
           document.removeEventListener("click", handleDocumentClick); // remove the listener here
         }
       }
       document.addEventListener("click", handleDocumentClick);
-    })
+    });
   }
 
+  document
+    .querySelector("form")
+    .addEventListener("submit", async function (event) {
+      // console.log('Form submitted'); // Log form submission for debugging
+      event.preventDefault(); // Prevent the form from reloading the page
 
-
-
-  document.querySelector("form").addEventListener("submit", async function (event) {
-    // console.log('Form submitted'); // Log form submission for debugging
-    event.preventDefault(); // Prevent the form from reloading the page
-
-    // Add the query in .convo div
-    const convoDiv = document.querySelector(".convo");
-    const newDiv = document.createElement("div");
-    newDiv.className = "query-container"; // Add a class to the new div
-    newDiv.innerText = document.getElementById("qry").value; // Set the query text
-    console.log(document.getElementById("qry").value)
-    convoDiv.appendChild(newDiv); // Append the new div to .convo
-
-
-    const formData = new FormData(this); // Get form data
-    const queryUrl = this.getAttribute("data-query-url"); // Get the query URL from the form attribute
-    document.getElementById("qry").value = ""; // Clear the input field
-
-
-    sendBtn = document.querySelector(".btn-search");
-    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    sendBtn.disabled = true;
-
-    const inputField = document.getElementById("qry");
-    inputField.disabled = true; // Disable the input field to prevent Enter key submission
-
-    // Add the response to the .convo div
-    try {
-      const apiCall = await fetch(queryUrl, {
-        method: "POST",
-        body: formData,
-      });
-      const response = await apiCall.json(); // Get the response text
-      const output = response.response;
-      console.log('Response:', output); // Log the response for debugging
-      // alert(x.response) 
-
+      // Add the query in .convo div
       const convoDiv = document.querySelector(".convo");
       const newDiv = document.createElement("div");
-      newDiv.className = "response-container";
-      newDiv.innerText = response.response; // Set the response text
+      newDiv.className = "query-container"; // Add a class to the new div
+      newDiv.innerText = document.getElementById("qry").value; // Set the query text
+      console.log(document.getElementById("qry").value);
       convoDiv.appendChild(newDiv); // Append the new div to .convo
 
+      const formData = new FormData(this); // Get form data
+      const queryUrl = this.getAttribute("data-query-url"); // Get the query URL from the form attribute
+      document.getElementById("qry").value = ""; // Clear the input field
 
-      // Re-enable the send button and Enter key
-      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
-      sendBtn.disabled = false;
-      inputField.disabled = false; // Re-enable the input field
+      sendBtn = document.querySelector(".btn-search");
+      sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      sendBtn.disabled = true;
 
+      const inputField = document.getElementById("qry");
+      inputField.disabled = true; // Disable the input field to prevent Enter key submission
 
+      // Add the response to the .convo div
+      try {
+        const apiCall = await fetch(queryUrl, {
+          method: "POST",
+          body: formData,
+        });
+        const response = await apiCall.json(); // Get the response text
+        const output = response.response;
+        console.log("Response:", output); // Log the response for debugging
+        // alert(x.response)
 
-    } catch (error) {
-      console.error("Error:", error);
-      // alert("An error occurred. Please try again.");
-      let ErrorDiv = document.createElement('div');
-      ErrorDiv.classList.add('error-div');
-      ErrorDiv.classList.add('response-container');
+        const convoDiv = document.querySelector(".convo");
+        const newDiv = document.createElement("div");
+        newDiv.className = "response-container";
+        newDiv.innerText = response.response; // Set the response text
+        convoDiv.appendChild(newDiv); // Append the new div to .convo
 
-      ErrorDiv.innerHTML = `
+        // Re-enable the send button and Enter key
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+        sendBtn.disabled = false;
+        inputField.disabled = false; // Re-enable the input field
+      } catch (error) {
+        console.error("Error:", error);
+        // alert("An error occurred. Please try again.");
+        let ErrorDiv = document.createElement("div");
+        ErrorDiv.classList.add("error-div");
+        ErrorDiv.classList.add("response-container");
+
+        ErrorDiv.innerHTML = `
         <i class="fa-solid fa-triangle-exclamation"></i>
         An error occurred. Please try again.
       `;
-      convoDiv.appendChild(ErrorDiv);
-      sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
-      sendBtn.disabled = false;
-      inputField.disabled = false;
-    }
-  });
-
-
+        convoDiv.appendChild(ErrorDiv);
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+        sendBtn.disabled = false;
+        inputField.disabled = false;
+      }
+    });
 
   // Add event listener for the Enter key on the text box
   document.getElementById("qry").addEventListener("keydown", function (event) {
@@ -279,28 +270,22 @@ async function main() {
   });
 
   document.querySelector(".history-tab").addEventListener("click", () => {
-    let sideTab = document.querySelector(".history-tab-div");
-
-    setTimeout(() => {
-      sideTab.classList.add("visible", true); //force add
-    }, 100);
-
-    const newChatBtn = document.querySelector(".new-chat");
-    const chatContainer = document.querySelector(".sidebar-chats-container");
-    newChatBtn.addEventListener('click', ()=>{
-      let newChat = document.createElement('div');
-      newChat.classList.add("sidebar-content-div");
-      newChat.innerText = "New Chat";
-      chatContainer.appendChild(newChat);
-    })
-
-    document.querySelector(".rmvIc0").addEventListener("click", () => {
-      setTimeout(() => {
-        sideTab.classList.toggle("visible", false); //force remove
-      }, 100);
-    });
+    const sideTab = document.querySelector(".history-tab-div");
+    sideTab.classList.add("visible");
   });
 
+  document.querySelector(".rmvIc0").addEventListener("click", () => {
+    const sideTab = document.querySelector(".history-tab-div");
+    sideTab.classList.remove("visible");
+  });
+
+  document.querySelector(".new-chat").addEventListener("click", () => {
+    const chatContainer = document.querySelector(".sidebar-chats-container");
+    const newChat = document.createElement("div");
+    newChat.classList.add("sidebar-content-div");
+    newChat.innerText = "New Chat";
+    chatContainer.appendChild(newChat);
+  });
 }
 
 main();
