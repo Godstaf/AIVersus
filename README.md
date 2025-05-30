@@ -91,6 +91,3 @@ Contributions are always welcome! Fork the repo, make your changes, and submit a
 
 This project is licensed under the **MIT License**. Feel free to use, modify, and distribute it.
 
----
-
-Let me know if you'd like further adjustments or additions to the README! 🚀
