@@ -46,8 +46,11 @@ async function deleteEmptyChats() {
 async function main() {
   // Helper to render all chats in the sidebar
   async function renderSidebarChats(selectedChatId = null) {
+    console.log('Rendering sidebar chats with selectedChatId:', selectedChatId);
+    
     const sidebarContent = document.querySelector(".sidebar-content-div");
     sidebarContent.innerHTML = "";
+
 
     const response = await fetch("/get_all_chats");
     const result = await response.json();
@@ -62,9 +65,13 @@ async function main() {
       chatDiv.dataset.chatId = chat.chat_id;
 
       // Highlight if this is the selected chat
+      // console.log('Selected chat ID:', selectedChatId);
+      // console.log('Current chat ID:', chat.chat_id);
+      
       if (selectedChatId && chat.chat_id === selectedChatId) {
         chatDiv.classList.add("active-chat");
         anySelected = true;
+        console.log("If Ran! Selected chat:", chat.chat_id);
       }
 
       chatDiv.addEventListener("click", function() {
@@ -135,8 +142,10 @@ async function main() {
         console.log("New chat created successfully.");
         if (result.chat_id) {
           await renderSidebarChats(result.chat_id); // Only this highlights and loads the new chat
+          // console.log("If condition met, chat_id:", result.chat_id);
         } else {
           await renderSidebarChats();
+          // console.log("No chat_id found, rendering all chats.");
         }
       } else {
         console.error("Error creating new chat:", await response.text());
@@ -220,7 +229,7 @@ async function main() {
     // Call loadChatHistory after successful login
     if (u_email !== null) {
       console.log("User is logged in with email:", u_email);
-      createNewChat(); // Create a new chat when the user logs in
+      await createNewChat(); // Create a new chat when the user logs in
 
     }
     // get chat id of the current chat
@@ -390,11 +399,7 @@ async function main() {
     }, 100);  
   });
 
-  // Add this line to render chats after login
-  // await renderSidebarChats();
 
-  await deleteEmptyChats(); // Call deleteEmptyChats to remove empty chats
-  // await renderSidebarChats();
 }
 
 main();
