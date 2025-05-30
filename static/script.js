@@ -84,6 +84,7 @@ async function main() {
     }
   }
 
+
   // Update loadChatHistory to accept chat_id
   async function loadChatHistory(chat_id) {
     try {
@@ -145,9 +146,6 @@ async function main() {
     }
   }
 
-
-
-
   // Fetch user email and name
   await fetchUserEmail(); // Wait for fetchUserEmail to complete
   console.log("User email:", u_email); // Now this will log the updated value
@@ -182,6 +180,7 @@ async function main() {
 
       let logger = document.createElement("div");
       logger.classList.add("logger");
+      
 
       let profSignUp = document.createElement("a");
       profSignUp.classList.add("profSignUp");
@@ -224,7 +223,9 @@ async function main() {
       createNewChat(); // Create a new chat when the user logs in
 
     }
-
+    // get chat id of the current chat
+    
+    // await loadChatHistory(); // Load the default chat history or the first chat
     document.querySelector(".profile").addEventListener("click", () => {
       let profBtn = document.querySelector(".profile");
       let existingProfileTab = document.querySelector(".main-profile-tab");

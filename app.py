@@ -186,7 +186,9 @@ def query_page():
     
     # return {"response": response.results[0].content}
     # return {"response": qry} 
-    
+
+
+
 @app.route("/registerit", methods=["POST"])
 def registerit():
     # Get form data

@@ -440,15 +440,11 @@ img{
 .sidebar-chat-entry:active,
 .sidebar-chat-entry:hover {
   background: none;
-  color: inherit;
+  color: #dedddd;
   outline: none;
 }
 
-/* Remove any special style for the first child */
-.sidebar-chat-entry:first-child {
-  background: none !important;
-  color: inherit !important;
-}
+
 
 .main-profile-tab{
     width: 250px;
