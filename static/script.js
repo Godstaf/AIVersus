@@ -1,4 +1,3 @@
-
 var u_email = null;
 var u_name = null;
 
@@ -24,10 +23,130 @@ async function fetchUserEmail() {
 
 }
 
+// delete empty chats
+async function deleteEmptyChats() {
+  try {
+    const response = await fetch("/delete_empty_chats", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
 
+    if (response.status === 200) {
+      console.log("Empty chats deleted successfully.");
+    } else {
+      console.error("Error deleting empty chats:", await response.text());
+    }
+  } catch (error) {
+    console.error("Error deleting empty chats:", error);
+  }
+}
 
 async function main() {
+  // Helper to render all chats in the sidebar
+  async function renderSidebarChats(selectedChatId = null) {
+    const sidebarContent = document.querySelector(".sidebar-content-div");
+    sidebarContent.innerHTML = "";
 
+    const response = await fetch("/get_all_chats");
+    const result = await response.json();
+    const chats = result.chats || [];
+
+    let anySelected = false;
+
+    chats.forEach((chat) => {
+      const chatDiv = document.createElement("div");
+      chatDiv.className = "sidebar-chat-entry";
+      chatDiv.innerText = chat.title || "New Chat";
+      chatDiv.dataset.chatId = chat.chat_id;
+
+      // Highlight if this is the selected chat
+      if (selectedChatId && chat.chat_id === selectedChatId) {
+        chatDiv.classList.add("active-chat");
+        anySelected = true;
+      }
+
+      chatDiv.addEventListener("click", function() {
+        document.querySelectorAll(".sidebar-chat-entry").forEach(e => e.classList.remove("active-chat"));
+        chatDiv.classList.add("active-chat");
+        loadChatHistory(chat.chat_id);
+      });
+
+      sidebarContent.appendChild(chatDiv);
+    });
+
+    // If no chat is selected, select and load the first one
+    const allChats = document.querySelectorAll(".sidebar-chat-entry");
+    if (allChats.length > 0 && !anySelected) {
+      allChats[0].classList.add("active-chat");
+      loadChatHistory(allChats[0].dataset.chatId);
+    }
+  }
+
+
+  // Update loadChatHistory to accept chat_id
+  async function loadChatHistory(chat_id) {
+    try {
+      const response = await fetch(`/get_chat_history?chat_id=${chat_id}`);
+      const result = await response.json();
+
+      // Check if the response is successful
+      if (response.status === 200) {
+        const convoDiv = document.querySelector(".convo");
+        convoDiv.innerHTML = ""; // Clear existing chat
+
+        // Display queries and responses
+        const queries = result.queries || []; // Default to empty array if not present
+        const responses = result.responses || []; // Default to empty array if not present
+        for (let i = 0; i < queries.length; i++) {
+          const queryDiv = document.createElement("div");
+          queryDiv.className = "query-container";
+          queryDiv.innerText = queries[i];
+          convoDiv.appendChild(queryDiv);
+
+          const responseDiv = document.createElement("div");
+          responseDiv.className = "response-container";
+          responseDiv.innerText = responses[i] || "No response"; // Default to "No response" if not present
+          convoDiv.appendChild(responseDiv); // Append the response div after the query div
+        }
+      } else {
+        console.error("Error loading chat history:", result.message);
+      }
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+  }
+
+
+  // Create a new chat and highlight it
+  async function createNewChat() {
+    try {
+      const response = await fetch("/new_chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: u_email })
+      });
+
+      if (response.status === 200) {
+        const result = await response.json();
+        console.log("New chat created successfully.");
+        if (result.chat_id) {
+          await renderSidebarChats(result.chat_id); // Only this highlights and loads the new chat
+        } else {
+          await renderSidebarChats();
+        }
+      } else {
+        console.error("Error creating new chat:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+    }
+  }
+
+  // Fetch user email and name
   await fetchUserEmail(); // Wait for fetchUserEmail to complete
   console.log("User email:", u_email); // Now this will log the updated value
   console.log("User name:", u_name);
@@ -61,6 +180,7 @@ async function main() {
 
       let logger = document.createElement("div");
       logger.classList.add("logger");
+      
 
       let profSignUp = document.createElement("a");
       profSignUp.classList.add("profSignUp");
@@ -96,44 +216,16 @@ async function main() {
   // -->loggen In
 
   else {
-
-    async function loadChatHistory() {
-      try {
-        const response = await fetch("/get_chat_history");
-        const result = await response.json();
-
-        // Check if the response is successful
-        if (response.status === 200) {
-          const convoDiv = document.querySelector(".convo");
-          convoDiv.innerHTML = ""; // Clear existing chat
-
-          // Display queries and responses
-          const queries = result.queries || []; // Default to empty array if not present
-          const responses = result.responses || []; // Default to empty array if not present
-          for (let i = 0; i < queries.length; i++) {
-            const queryDiv = document.createElement("div");
-            queryDiv.className = "query-container";
-            queryDiv.innerText = queries[i];
-            convoDiv.appendChild(queryDiv);
-
-            const responseDiv = document.createElement("div");
-            responseDiv.className = "response-container";
-            responseDiv.innerText = responses[i] || "No response"; // Default to "No response" if not present
-            convoDiv.appendChild(responseDiv); // Append the response div after the query div
-          }
-        } else {
-          console.error("Error loading chat history:", result.message);
-        }
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      }
-    }
-
+    await deleteEmptyChats(); // Delete empty chats before creating a new one
     // Call loadChatHistory after successful login
     if (u_email !== null) {
-      loadChatHistory();
-    }
+      console.log("User is logged in with email:", u_email);
+      createNewChat(); // Create a new chat when the user logs in
 
+    }
+    // get chat id of the current chat
+    
+    // await loadChatHistory(); // Load the default chat history or the first chat
     document.querySelector(".profile").addEventListener("click", () => {
       let profBtn = document.querySelector(".profile");
       let existingProfileTab = document.querySelector(".main-profile-tab");
@@ -280,20 +372,29 @@ async function main() {
 
   document.querySelector(".history-tab").addEventListener("click", () => {
     let sideTab = document.querySelector(".history-tab-div");
-
-    setTimeout(() => {
-      sideTab.classList.add("visible", true); //force add
-    }, 100);
-
-
-
-    document.querySelector(".rmvIc0").addEventListener("click", () => {
-      setTimeout(() => {
-        sideTab.classList.toggle("visible", false); //force remove
-      }, 100);
-    });
+    sideTab.classList.add("visible", true);
   });
 
+  document.querySelector(".history-tab-div .new-chat").addEventListener("click", async (event) => {
+    event.preventDefault();
+    await deleteEmptyChats(); // Delete empty chats before creating a new one
+    await createNewChat();
+    let sideTab = document.querySelector(".history-tab-div");
+    sideTab.classList.add("visible", true);
+  });
+
+  document.querySelector(".rmvIc0").addEventListener("click", () => {
+    let sideTab = document.querySelector(".history-tab-div");
+    setTimeout(() => {
+      sideTab.classList.toggle("visible", false);
+    }, 100);  
+  });
+
+  // Add this line to render chats after login
+  // await renderSidebarChats();
+
+  await deleteEmptyChats(); // Call deleteEmptyChats to remove empty chats
+  // await renderSidebarChats();
 }
 
 main();

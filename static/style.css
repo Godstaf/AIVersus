@@ -394,13 +394,56 @@ img{
     margin-top: 10px;
     width: 100%;
     border-radius: 5px;
-    background-color: rgba(255, 255, 255, 0.085);
     height: 5%;
     display: flex;
     /* justify-content: center; */
     text-indent: 10px;
     align-items: center;
+    flex-direction: column; /* Stack children vertically */
+    gap: 8px; /* Optional: space between chats */
 }
+
+
+.sidebar-chat-entry {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.sidebar-chat-entry.active-chat {
+  background: #23244a !important; /* Bluish highlight */
+  color: #fff !important;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+/* Remove default focus/active/hover styles */
+.sidebar-chat-entry:focus,
+.sidebar-chat-entry:active,
+.sidebar-chat-entry:hover {
+  background: none;
+  color: inherit;
+  outline: none;
+}
+
+
+.sidebar-chat-entry.active-chat {
+  background: #23244a !important; /* Bluish highlight */
+  color: #fff !important;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+/* Remove default focus/active/hover styles */
+.sidebar-chat-entry:focus,
+.sidebar-chat-entry:active,
+.sidebar-chat-entry:hover {
+  background: none;
+  color: #dedddd;
+  outline: none;
+}
+
 
 
 .main-profile-tab{
