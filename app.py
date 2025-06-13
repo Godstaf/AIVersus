@@ -124,8 +124,8 @@ def get_chat_history():
             return jsonify({"status": "error", "message": "No chat history found for this chat ID"}), 404
     else:
         return jsonify({"status": "error", "message": "No chat history found"}), 404
-    
-    
+
+
 
 @app.route("/delete_empty_chats", methods=["POST"])
 def delete_empty_chats():
@@ -165,13 +165,27 @@ def query_page():
         contents=[qry]
     )
     
+    client2 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
+    response2 = client2.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[qry]
+    )
+    
+    client3 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
+    response3 = client3.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[qry]
+    )
+    
     if email is not None and chat_id is not None:
         # Update the correct chat document by _id
         collection.update_one(
             {"_id": ObjectId(chat_id)},
             {"$push": {
                 "queries": qry,
-                "responses": response.text
+                "responses1": response.text,
+                "responses2": response2.text,
+                "responses3": response3.text
             }}
         )
     elif email is not None:
@@ -179,10 +193,16 @@ def query_page():
         collection.insert_one({
             "email": email,
             "queries": [qry],
-            "responses": [response.text]
+            "responses": [response.text],
+            "responses2": [response2.text],
+            "responses3": [response3.text]
         })
 
-    return {"response": response.text}   
+    return {
+        "response": response.text,
+        "response2": response2.text,
+        "response3": response3.text    
+        }   
     
     # return {"response": response.results[0].content}
     # return {"response": qry} 
@@ -212,6 +232,8 @@ def registerit():
     if not emailId or not name:
         return jsonify({"status": "error", "message": "Email and Name cannot be empty"}), 400
 
+
+    
     try:
         # Create the table if it doesn't exist
         cr.execute(
@@ -239,10 +261,10 @@ def registerit():
     except Exception as e:
         print("Error:", e)
         return jsonify({"status": "error", "message": "An error occurred while registering the user"}), 500
-    
 
-    
-    
+
+
+
 @app.route("/loginit", methods=["POST"])
 def loginit():
     # Get form data
