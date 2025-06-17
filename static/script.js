@@ -59,6 +59,7 @@ async function main() {
     let anySelected = false;
 
     chats.forEach((chat) => {
+      console.log(chat);
       const chatDiv = document.createElement("div");
       chatDiv.className = "sidebar-chat-entry";
       chatDiv.innerText = chat.title || "New Chat";
@@ -105,17 +106,89 @@ async function main() {
 
         // Display queries and responses
         const queries = result.queries || []; // Default to empty array if not present
-        const responses = result.responses || []; // Default to empty array if not present
+        const response = result.response || []; // Default to empty array if not present
+        const response2 = result.response2 || [];
+        const response3 = result.response3 || [];
         for (let i = 0; i < queries.length; i++) {
           const queryDiv = document.createElement("div");
           queryDiv.className = "query-container";
           queryDiv.innerText = queries[i];
           convoDiv.appendChild(queryDiv);
 
-          const responseDiv = document.createElement("div");
-          responseDiv.className = "response-container";
-          responseDiv.innerText = responses[i] || "No response"; // Default to "No response" if not present
-          convoDiv.appendChild(responseDiv); // Append the response div after the query div
+          // const responseDiv = document.createElement("div");
+          // responseDiv.className = "response-container";
+          // responseDiv.innerText = response[i] || "No response"; // Default to "No response" if not present
+          // convoDiv.appendChild(responseDiv); // Append the response div after the query div
+
+          // const responseDiv2 = document.createElement("div");
+          // responseDiv2.className = "response-container";
+          // responseDiv2.innerText = response2[i];
+          // convoDiv.appendChild(responseDiv2);
+        
+
+          // const responseDiv3 = document.createElement("div");
+          // responseDiv3.className = "response-container";  
+          // responseDiv3.innerText = response3[i];
+          // convoDiv.appendChild(responseDiv3);
+
+          // Add the response in .convo div
+
+          const newDiv = document.createElement("div");
+          newDiv.className = "response-container";
+
+          const responseNav = document.createElement("nav");
+          responseNav.className="response-nav";
+          responseNav.innerText = "Chat-Gpt"
+          newDiv.appendChild(responseNav);
+
+          const responseContent = document.createElement("div");
+          responseContent.className = "response-content";
+          responseContent.innerText = response[i];
+          // console.log(response[i]);
+          newDiv.appendChild(responseContent);
+
+          const wholeResponseContainer = document.createElement("div");
+          wholeResponseContainer.className = "whole-res-container";
+          wholeResponseContainer.appendChild(newDiv);
+
+
+          // Add the second response
+          const newDiv2 = document.createElement("div");
+          newDiv2.className = "response-container";
+          const responseNav2 = document.createElement("nav");
+          responseNav2.className="response-nav";
+          responseNav2.innerText = "DeepSeek";
+          newDiv2.appendChild(responseNav2);
+
+          const responseContent2 = document.createElement("div");
+          responseContent2.className = "response-content";
+          responseContent2.innerText = response2[i];
+          // console.log(response2[i]);
+          newDiv2.appendChild(responseContent2);
+
+          wholeResponseContainer.appendChild(newDiv2);
+
+
+          // Add the third response
+          const newDiv3 = document.createElement("div");
+          newDiv3.className = "response-container";
+          const responseNav3 = document.createElement("nav");
+          responseNav3.className="response-nav";
+          responseNav3.innerText = "Gemini";
+          newDiv3.appendChild(responseNav3);
+
+          const responseContent3 = document.createElement("div");
+          responseContent3.className = "response-content";
+          responseContent3.innerText = response3[i];
+          // console.log(response3[i]);
+          newDiv3.appendChild(responseContent3);
+
+          wholeResponseContainer.appendChild(newDiv3);
+
+          convoDiv.appendChild(wholeResponseContainer); // Append the new div to .convo
+          
+
+
         }
       } else {
         console.error("Error loading chat history:", result.message);
@@ -330,15 +403,66 @@ async function main() {
       });
       const response = await apiCall.json(); // Get the response text
       const output = response.response;
+      const output2 = response.response2;
+      const output3 = response.response3;
       console.log('Response:', output); // Log the response for debugging
+      console.log('Response:', output2); // Log the response for debugging
+      console.log('Response:', output3); // Log the response for debugging
       // alert(x.response) 
+
+      // Add the response in .convo div
 
       const convoDiv = document.querySelector(".convo");
       const newDiv = document.createElement("div");
       newDiv.className = "response-container";
-      newDiv.innerText = response.response; // Set the response text
-      convoDiv.appendChild(newDiv); // Append the new div to .convo
 
+      const responseNav = document.createElement("nav");
+      responseNav.className="response-nav";
+      responseNav.innerText = "Chat-Gpt"
+      newDiv.appendChild(responseNav);
+
+      const responseContent = document.createElement("div");
+      responseContent.className = "response-content";
+      responseContent.innerText = response.response;
+      newDiv.appendChild(responseContent)
+
+      const wholeResponseContainer = document.createElement("div");
+      wholeResponseContainer.className = "whole-res-container";
+      wholeResponseContainer.appendChild(newDiv);
+
+
+      // Add the second response
+      const newDiv2 = document.createElement("div");
+      newDiv2.className = "response-container";
+      const responseNav2 = document.createElement("nav");
+      responseNav2.className="response-nav";
+      responseNav2.innerText = "DeepSeek";
+      newDiv2.appendChild(responseNav2);
+
+      const responseContent2 = document.createElement("div");
+      responseContent2.className = "response-content";
+      responseContent2.innerText = response.response2;
+      newDiv2.appendChild(responseContent2)
+
+      wholeResponseContainer.appendChild(newDiv2);
+
+
+      // Add the third response
+      const newDiv3 = document.createElement("div");
+      newDiv3.className = "response-container";
+      const responseNav3 = document.createElement("nav");
+      responseNav3.className="response-nav";
+      responseNav3.innerText = "Gemini";
+      newDiv3.appendChild(responseNav3);
+
+      const responseContent3 = document.createElement("div");
+      responseContent3.className = "response-content";
+      responseContent3.innerText = response.response3;
+      newDiv3.appendChild(responseContent3)
+
+      wholeResponseContainer.appendChild(newDiv3);
+
+      convoDiv.appendChild(wholeResponseContainer); // Append the new div to .convo
 
       // Re-enable the send button and Enter key
       sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';

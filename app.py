@@ -62,7 +62,7 @@ def new_chat():
     collection.insert_one({
         "email": email,
         "queries": [],
-        "responses": []
+        "response": []
     })
     chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
     if chat_doc is not None:
@@ -87,7 +87,9 @@ def get_all_chats():
             "chats": [{
                 "chat_id": str(doc["_id"]),
                 "queries": doc.get("queries", []),
-                "responses": doc.get("responses", [])
+                "response": doc.get("response", []),
+                "response2": doc.get("response2", []),
+                "response3": doc.get("response3", [])
             } for doc in user_docs]
         }), 200
     else:
@@ -118,7 +120,9 @@ def get_chat_history():
             return jsonify({
                 "status": "success",
                 "queries": user_doc[chatIdIndx].get("queries", []),
-                "responses": user_doc[chatIdIndx].get("responses", [])
+                "response": user_doc[chatIdIndx].get("response", []),
+                "response2": user_doc[chatIdIndx].get("response2", []),
+                "response3": user_doc[chatIdIndx].get("response3", [])
             }), 200
         else:
             return jsonify({"status": "error", "message": "No chat history found for this chat ID"}), 404
@@ -132,12 +136,14 @@ def delete_empty_chats():
     email = session.get("userEmail")
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401  
-    # Delete all chats for the user that have no queries or responses
+    # Delete all chats for the user that have no queries or response
     result = collection.delete_many({
         "email": email,
         "$or": [
             {"queries": {"$size": 0}},
-            {"responses": {"$size": 0}}
+            {"response": {"$size": 0}},
+            {"response2": {"$size": 0}},
+            {"response3": {"$size": 0}}
         ]
     })
     return jsonify({"status": "success", "message": f"{result.deleted_count} empty chats deleted."}), 200
@@ -183,9 +189,9 @@ def query_page():
             {"_id": ObjectId(chat_id)},
             {"$push": {
                 "queries": qry,
-                "responses1": response.text,
-                "responses2": response2.text,
-                "responses3": response3.text
+                "response": response.text,
+                "response2": response2.text,
+                "response3": response3.text
             }}
         )
     elif email is not None:
@@ -193,9 +199,9 @@ def query_page():
         collection.insert_one({
             "email": email,
             "queries": [qry],
-            "responses": [response.text],
-            "responses2": [response2.text],
-            "responses3": [response3.text]
+            "response": [response.text],
+            "response2": [response2.text],
+            "response3": [response3.text]
         })
 
     return {

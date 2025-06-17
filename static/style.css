@@ -202,7 +202,7 @@ img{
 /* conversation field--> */
 .convo{
     display: flex;
-    width: 60%;
+    width: 90%;
     flex-direction: column;
     gap: 10px;
     margin: 0 auto;
@@ -230,19 +230,68 @@ img{
 
 /* just bellow the navbar */
 .response-container {
-    padding-left: 10%;
-    align-self: flex-start; /* Align to the left side of the screen */
+    border-radius: 15px;
+    border: 2px solid black;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    /* flex-direction: column; */
+    color: white;
+    background-color: #1a1b2e;
+    /* border: 2px solid white; */
+    max-height: 600px;
+    width: 33%;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+}
+
+.response-nav{
+    height: 35px;
+    background-color: black;
+    width: 100%;
+    border-radius: 12px 12px 0px 0px;
+    align-self: flex-start;
+    flex-shrink: 0;
+    background-color: #080A10;
     display: flex;
-    /* max-width: 45%; */
-    max-width: 80%;
-    width: fit-content;
-    margin: 0;
-    padding: 10px;
-    /* background-color: #1a1b2f; */
-    color: #ffffff;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+.response-content{
+    flex-grow: 1;
+    color: #e0e0e0;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    padding: 20px;
+}
+
+.response-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+.response-content::-webkit-scrollbar-track {
+    background-color: transparent;
+    margin-top: 5px;
+    margin-bottom: 5px;
     border-radius: 10px;
-    line-height: 1.5; /*Increase line height for readability*/
-    word-wrap: break-word; /* Ensure long words break to the next line */
+}
+  
+.response-content::-webkit-scrollbar-thumb {
+    background-color: 	#444c66;
+    border-radius: 10px;
+}
+  
+.response-content::-webkit-scrollbar-thumb:hover {
+    background-color: #5c6688;
+}  
+
+.whole-res-container{
+    display: flex;
+    gap: 1rem;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    justify-content: space-evenly;
 }
 
 .error-div{
@@ -265,7 +314,7 @@ img{
     width: fit-content;
     margin: 0;
     padding: 10px;
-    background-color: #1a1b2f; /* Background for each response */
+    background-color: #2d3272; /* Background for each response */
     color: #ffffff;
     border-radius: 10px;
     line-height: 1.5; /*Increase line height for readability*/
@@ -315,14 +364,14 @@ img{
 
     .query-container,
     .response-container {
-        max-width: 90%; /* Allow more space for messages */
+        width: 90%; /* Allow more space for messages */
         font-size: 14px;
     }
 }
 
 @media screen and (max-width: 1024px) {
     .convo {
-        width: 75%; /* Adjust chat width */
+        width: 90%; /* Adjust chat width */
     }
 
     .bottom-textbox {
@@ -336,12 +385,20 @@ img{
     .btn {
         font-size: 1rem;
     }
+
+    .response-container {
+        width: 90%; /* Allow more space for messages */
+        font-size: 14px;
+    }
+    .whole-res-container{
+        flex-direction: column;
+    }
 }
 
 
 @media screen and (min-width: 1025px) {
     .convo {
-        width: 60%;
+        width: 90%;
     }
 
     .bottom-textbox {
