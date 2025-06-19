@@ -209,7 +209,8 @@ img{
     padding: 10px;
     border-radius: 9px;
     /* border-bottom: 20%; */
-    overflow-y: auto;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
     scrollbar-width: none;
     /* max-height: calc(100vh-140px-100px); */
 
@@ -264,6 +265,7 @@ img{
     overflow-y: scroll;
     scroll-behavior: smooth;
     padding: 20px;
+    max-height: 495px; /* Adjust based on your layout */
 }
 
 .response-content::-webkit-scrollbar {
@@ -407,6 +409,9 @@ img{
 }
 
 .history-tab-div {
+    overflow-y: auto;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    scroll-behavior: smooth; /* Smooth scrolling */
     position: absolute;
     width: 250px;
     left: -300px;

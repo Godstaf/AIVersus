@@ -59,7 +59,7 @@ async function main() {
     let anySelected = false;
 
     chats.forEach((chat) => {
-      console.log(chat);
+      chat.title = chat.queries[0] || ""; // Get the first query as the title, or an empty string if not present
       const chatDiv = document.createElement("div");
       chatDiv.className = "sidebar-chat-entry";
       chatDiv.innerText = chat.title || "New Chat";
@@ -74,6 +74,8 @@ async function main() {
         anySelected = true;
         console.log("If Ran! Selected chat:", chat.chat_id);
       }
+
+
 
       chatDiv.addEventListener("click", function() {
         document.querySelectorAll(".sidebar-chat-entry").forEach(e => e.classList.remove("active-chat"));
@@ -212,11 +214,14 @@ async function main() {
 
       if (response.status === 200) {
         const result = await response.json();
-        console.log("New chat created successfully.");
+        // console.log("New chat created successfully.");
+        console.log("New chat created successfully with ID:", result.chat_id);
         if (result.chat_id) {
           await renderSidebarChats(result.chat_id); // Only this highlights and loads the new chat
           // console.log("If condition met, chat_id:", result.chat_id);
+          await loadChatHistory(result.chat_id);   // Explicitly load the new chat's content
         } else {
+          console.warn("New chat created but no chat_id returned. Rendering all chats.");
           await renderSidebarChats();
           // console.log("No chat_id found, rendering all chats.");
         }
@@ -394,6 +399,7 @@ async function main() {
 
     const inputField = document.getElementById("qry");
     inputField.disabled = true; // Disable the input field to prevent Enter key submission
+    
 
     // Add the response to the .convo div
     try {
@@ -509,9 +515,28 @@ async function main() {
   });
 
   document.querySelector(".history-tab-div .new-chat").addEventListener("click", async (event) => {
+
+    // check if there already exists an empty chat and if it exists then simply open it
+    const response = await fetch("/get_all_chats");
+    const result = await response.json();
+    const chats = result.chats || [];
+    const emptyChat = chats.find(chat => (chat.queries.length === 0 || !chat.queries[0]));
+    if (emptyChat) {
+      await renderSidebarChats(emptyChat.chat_id);
+      loadChatHistory(emptyChat.chat_id);
+      let sideTab = document.querySelector(".history-tab-div");
+      sideTab.classList.add("visible", true);
+      return;
+    }
+    
+
     event.preventDefault();
     await deleteEmptyChats(); // Delete empty chats before creating a new one
-    await createNewChat();
+    await createNewChat(); // Create a new chat when the user clicks "New Chat"
+    
+    // createNewChat will now also load the chat content.
+
+    // Keep the sidebar visible after creating a new chat
     let sideTab = document.querySelector(".history-tab-div");
     sideTab.classList.add("visible", true);
   });
