@@ -1,6 +1,7 @@
 var u_email = null;
 var u_name = null;
 
+
 async function fetchUserEmail() {
 
   try {
@@ -44,10 +45,13 @@ async function deleteEmptyChats() {
 }
 
 async function main() {
+  var chatgptBtn = true; // Initialize chatgptBtn to true
+  var deepseekBtn = true; // Initialize DeepSeekBtn to true
+  var geminiBtn = true; // Initialize geminiBtn to true
   // Helper to render all chats in the sidebar
   async function renderSidebarChats(selectedChatId = null) {
     console.log('Rendering sidebar chats with selectedChatId:', selectedChatId);
-    
+
     const sidebarContent = document.querySelector(".sidebar-content-div");
     sidebarContent.innerHTML = "";
 
@@ -68,7 +72,7 @@ async function main() {
       // Highlight if this is the selected chat
       // console.log('Selected chat ID:', selectedChatId);
       // console.log('Current chat ID:', chat.chat_id);
-      
+
       if (selectedChatId && chat.chat_id === selectedChatId) {
         chatDiv.classList.add("active-chat");
         anySelected = true;
@@ -77,7 +81,7 @@ async function main() {
 
 
 
-      chatDiv.addEventListener("click", function() {
+      chatDiv.addEventListener("click", function () {
         document.querySelectorAll(".sidebar-chat-entry").forEach(e => e.classList.remove("active-chat"));
         chatDiv.classList.add("active-chat");
         loadChatHistory(chat.chat_id);
@@ -97,6 +101,9 @@ async function main() {
 
   // Update loadChatHistory to accept chat_id
   async function loadChatHistory(chat_id) {
+    chatgptBtn = true; // Initialize chatgptBtn to true
+    deepseekBtn = true; // Initialize DeepSeekBtn to true
+    geminiBtn = true; // Initialize geminiBtn to true
     try {
       const response = await fetch(`/get_chat_history?chat_id=${chat_id}`);
       const result = await response.json();
@@ -126,69 +133,76 @@ async function main() {
           // responseDiv2.className = "response-container";
           // responseDiv2.innerText = response2[i];
           // convoDiv.appendChild(responseDiv2);
-        
+
 
           // const responseDiv3 = document.createElement("div");
           // responseDiv3.className = "response-container";  
           // responseDiv3.innerText = response3[i];
           // convoDiv.appendChild(responseDiv3);
 
-          // Add the response in .convo div
-
-          const newDiv = document.createElement("div");
-          newDiv.className = "response-container";
-
-          const responseNav = document.createElement("nav");
-          responseNav.className="response-nav";
-          responseNav.innerText = "Chat-Gpt"
-          newDiv.appendChild(responseNav);
-
-          const responseContent = document.createElement("div");
-          responseContent.className = "response-content";
-          responseContent.innerText = response[i];
-          // console.log(response[i]);
-          newDiv.appendChild(responseContent);
-
           const wholeResponseContainer = document.createElement("div");
           wholeResponseContainer.className = "whole-res-container";
-          wholeResponseContainer.appendChild(newDiv);
+
+          // Add the response in .convo div
+          if (response[i]) {
+            const newDiv = document.createElement("div");
+            newDiv.className = "response-container";
+
+            const responseNav = document.createElement("nav");
+            responseNav.className = "response-nav";
+            responseNav.innerText = "Chat-Gpt"
+            newDiv.appendChild(responseNav);
+
+            const responseContent = document.createElement("div");
+            responseContent.className = "response-content";
+            responseContent.innerText = response[i];
+            // console.log(response[i]);
+            newDiv.appendChild(responseContent);
+
+
+            wholeResponseContainer.appendChild(newDiv);
+          }
 
 
           // Add the second response
-          const newDiv2 = document.createElement("div");
-          newDiv2.className = "response-container";
-          const responseNav2 = document.createElement("nav");
-          responseNav2.className="response-nav";
-          responseNav2.innerText = "DeepSeek";
-          newDiv2.appendChild(responseNav2);
+          if (response2[i]) {
+            const newDiv2 = document.createElement("div");
+            newDiv2.className = "response-container";
+            const responseNav2 = document.createElement("nav");
+            responseNav2.className = "response-nav";
+            responseNav2.innerText = "DeepSeek";
+            newDiv2.appendChild(responseNav2);
 
-          const responseContent2 = document.createElement("div");
-          responseContent2.className = "response-content";
-          responseContent2.innerText = response2[i];
-          // console.log(response2[i]);
-          newDiv2.appendChild(responseContent2);
+            const responseContent2 = document.createElement("div");
+            responseContent2.className = "response-content";
+            responseContent2.innerText = response2[i];
+            // console.log(response2[i]);
+            newDiv2.appendChild(responseContent2);
 
-          wholeResponseContainer.appendChild(newDiv2);
+            wholeResponseContainer.appendChild(newDiv2);
+          }
 
 
           // Add the third response
-          const newDiv3 = document.createElement("div");
-          newDiv3.className = "response-container";
-          const responseNav3 = document.createElement("nav");
-          responseNav3.className="response-nav";
-          responseNav3.innerText = "Gemini";
-          newDiv3.appendChild(responseNav3);
+          if (response3[i]) {
+            const newDiv3 = document.createElement("div");
+            newDiv3.className = "response-container";
+            const responseNav3 = document.createElement("nav");
+            responseNav3.className = "response-nav";
+            responseNav3.innerText = "Gemini";
+            newDiv3.appendChild(responseNav3);
 
-          const responseContent3 = document.createElement("div");
-          responseContent3.className = "response-content";
-          responseContent3.innerText = response3[i];
-          // console.log(response3[i]);
-          newDiv3.appendChild(responseContent3);
+            const responseContent3 = document.createElement("div");
+            responseContent3.className = "response-content";
+            responseContent3.innerText = response3[i];
+            // console.log(response3[i]);
+            newDiv3.appendChild(responseContent3);
 
-          wholeResponseContainer.appendChild(newDiv3);
+            wholeResponseContainer.appendChild(newDiv3);
+          }
 
           convoDiv.appendChild(wholeResponseContainer); // Append the new div to .convo
-          
+
 
 
         }
@@ -203,6 +217,9 @@ async function main() {
 
   // Create a new chat and highlight it
   async function createNewChat() {
+    chatgptBtn = true; // Initialize chatgptBtn to true
+    deepseekBtn = true; // Initialize DeepSeekBtn to true
+    geminiBtn = true; // Initialize geminiBtn to true
     try {
       const response = await fetch("/new_chat", {
         method: "POST",
@@ -267,7 +284,7 @@ async function main() {
 
       let logger = document.createElement("div");
       logger.classList.add("logger");
-      
+
 
       let profSignUp = document.createElement("a");
       profSignUp.classList.add("profSignUp");
@@ -311,7 +328,7 @@ async function main() {
 
     }
     // get chat id of the current chat
-    
+
     // await loadChatHistory(); // Load the default chat history or the first chat
     document.querySelector(".profile").addEventListener("click", () => {
       let profBtn = document.querySelector(".profile");
@@ -373,6 +390,87 @@ async function main() {
   }
 
 
+  document.querySelector(".chatgpt-btn").addEventListener("click", async () => {
+    // Handle ChatGPT button click
+    if (chatgptBtn === true && deepseekBtn === false && geminiBtn === false) {
+      alert("Choose at least one AI model to query.");
+    }
+    else {
+      chatgptBtn = !chatgptBtn;
+      if (chatgptBtn === false) {
+        document.querySelector(".chatgpt-logo").style.filter = "grayscale(50%) brightness(0.5)";
+        // console.log('ChatGPT button is now disabled');
+
+      }
+      else {
+        document.querySelector(".chatgpt-logo").style.filter = "grayscale(0%) brightness(1)";
+        // console.log('ChatGPT button is now enabled');
+      }
+      console.log("ChatGPT button toggled:", chatgptBtn);
+      await fetch('/chatgpt-btn', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ chatgptBtn: chatgptBtn })
+      });
+    }
+  });
+
+
+  document.querySelector(".deepseek-btn").addEventListener("click", async () => {
+    // Handle DeepSeek button click
+    if (deepseekBtn === true && chatgptBtn === false && geminiBtn === false) {
+      alert("Choose at least one AI model to query.");
+    }
+    else {
+      deepseekBtn = !deepseekBtn;
+      if (deepseekBtn === false) {
+        document.querySelector(".deepseek-logo").style.filter = "grayscale(50%) brightness(0.5)";
+        // console.log('DeepSeek button is now disabled');
+      }
+      else {
+        document.querySelector(".deepseek-logo").style.filter = "grayscale(0%) brightness(1)";
+        // console.log('DeepSeek button is now enabled');
+      }
+      console.log("DeepSeek button toggled:", deepseekBtn);
+      await fetch('/deepseek-btn', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ deepseekBtn: deepseekBtn })
+      });
+    }
+  });
+
+
+  document.querySelector(".gemini-btn").addEventListener("click", async () => {
+    // Handle Gemini button click
+    if (geminiBtn === true && chatgptBtn === false && deepseekBtn === false) {
+      alert("Choose at least one AI model to query.");
+    }
+    else {
+      geminiBtn = !geminiBtn;
+      if (geminiBtn === false) {
+        document.querySelector(".gemini-logo").style.filter = "grayscale(50%) brightness(0.5)";
+        // console.log('Gemini button is now disabled');
+      }
+      else {
+        document.querySelector(".gemini-logo").style.filter = "grayscale(0%) brightness(1)";
+      }
+      console.log("Gemini button toggled:", geminiBtn);
+      await fetch('/gemini-btn', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ geminiBtn: geminiBtn })
+      });
+    }
+  });
+
+
 
 
   document.querySelector("form").addEventListener("submit", async function (event) {
@@ -399,7 +497,7 @@ async function main() {
 
     const inputField = document.getElementById("qry");
     inputField.disabled = true; // Disable the input field to prevent Enter key submission
-    
+
 
     // Add the response to the .convo div
     try {
@@ -412,61 +510,68 @@ async function main() {
       const output2 = response.response2;
       const output3 = response.response3;
       console.log('Response:', output); // Log the response for debugging
-      console.log('Response:', output2); // Log the response for debugging
-      console.log('Response:', output3); // Log the response for debugging
-      // alert(x.response) 
-
-      // Add the response in .convo div
-
-      const convoDiv = document.querySelector(".convo");
-      const newDiv = document.createElement("div");
-      newDiv.className = "response-container";
-
-      const responseNav = document.createElement("nav");
-      responseNav.className="response-nav";
-      responseNav.innerText = "Chat-Gpt"
-      newDiv.appendChild(responseNav);
-
-      const responseContent = document.createElement("div");
-      responseContent.className = "response-content";
-      responseContent.innerText = response.response;
-      newDiv.appendChild(responseContent)
+      console.log('Response2:', output2); // Log the response for debugging
+      console.log('Response3:', output3); // Log the response for debugging
+      // alert(x.response)
 
       const wholeResponseContainer = document.createElement("div");
       wholeResponseContainer.className = "whole-res-container";
-      wholeResponseContainer.appendChild(newDiv);
+
+      // Add the response in .convo div
+      if (output) {
+        const convoDiv = document.querySelector(".convo");
+        const newDiv = document.createElement("div");
+        newDiv.className = "response-container";
+
+        const responseNav = document.createElement("nav");
+        responseNav.className = "response-nav";
+        responseNav.innerText = "Chat-Gpt"
+        newDiv.appendChild(responseNav);
+
+        const responseContent = document.createElement("div");
+        responseContent.className = "response-content";
+        responseContent.innerText = response.response;
+        newDiv.appendChild(responseContent)
+
+
+        wholeResponseContainer.appendChild(newDiv);
+      }
 
 
       // Add the second response
-      const newDiv2 = document.createElement("div");
-      newDiv2.className = "response-container";
-      const responseNav2 = document.createElement("nav");
-      responseNav2.className="response-nav";
-      responseNav2.innerText = "DeepSeek";
-      newDiv2.appendChild(responseNav2);
+      if (output2) {
+        const newDiv2 = document.createElement("div");
+        newDiv2.className = "response-container";
+        const responseNav2 = document.createElement("nav");
+        responseNav2.className = "response-nav";
+        responseNav2.innerText = "DeepSeek";
+        newDiv2.appendChild(responseNav2);
 
-      const responseContent2 = document.createElement("div");
-      responseContent2.className = "response-content";
-      responseContent2.innerText = response.response2;
-      newDiv2.appendChild(responseContent2)
+        const responseContent2 = document.createElement("div");
+        responseContent2.className = "response-content";
+        responseContent2.innerText = response.response2;
+        newDiv2.appendChild(responseContent2)
 
-      wholeResponseContainer.appendChild(newDiv2);
+        wholeResponseContainer.appendChild(newDiv2);
+      }
 
 
       // Add the third response
-      const newDiv3 = document.createElement("div");
-      newDiv3.className = "response-container";
-      const responseNav3 = document.createElement("nav");
-      responseNav3.className="response-nav";
-      responseNav3.innerText = "Gemini";
-      newDiv3.appendChild(responseNav3);
+      if (output3) {
+        const newDiv3 = document.createElement("div");
+        newDiv3.className = "response-container";
+        const responseNav3 = document.createElement("nav");
+        responseNav3.className = "response-nav";
+        responseNav3.innerText = "Gemini";
+        newDiv3.appendChild(responseNav3);
 
-      const responseContent3 = document.createElement("div");
-      responseContent3.className = "response-content";
-      responseContent3.innerText = response.response3;
-      newDiv3.appendChild(responseContent3)
+        const responseContent3 = document.createElement("div");
+        responseContent3.className = "response-content";
+        responseContent3.innerText = response.response3;
+        newDiv3.appendChild(responseContent3)
 
-      wholeResponseContainer.appendChild(newDiv3);
+        wholeResponseContainer.appendChild(newDiv3);
+      }
 
       convoDiv.appendChild(wholeResponseContainer); // Append the new div to .convo
 
@@ -528,12 +633,12 @@ async function main() {
       sideTab.classList.add("visible", true);
       return;
     }
-    
+
 
     event.preventDefault();
     await deleteEmptyChats(); // Delete empty chats before creating a new one
     await createNewChat(); // Create a new chat when the user clicks "New Chat"
-    
+
     // createNewChat will now also load the chat content.
 
     // Keep the sidebar visible after creating a new chat
@@ -545,7 +650,7 @@ async function main() {
     let sideTab = document.querySelector(".history-tab-div");
     setTimeout(() => {
       sideTab.classList.toggle("visible", false);
-    }, 100);  
+    }, 100);
   });
 
 

@@ -159,29 +159,96 @@ def login_page():
     return render_template("login.html")
 
 
+
+@app.route("/chatgpt-btn", methods=["POST"])
+def chatgpt_btn():
+    data= request.get_json()
+    chatgpt_btn = str(data.get('chatgptBtn', True))
+    try:
+        # Ensure chatgpt_btn is a boolean
+        print("Received chatgpt_btn:", type(chatgpt_btn))
+        if chatgpt_btn not in ["True", "False"]:
+            return jsonify({"status": "error", "message": "Invalid button state"}), 400
+        
+        # Store the button state in the session
+        session["chatgpt_tgl"] = chatgpt_btn
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "success", "message": "ChatGPT button state updated"}), 200
+
+
+
+@app.route("/deepseek-btn", methods=["POST"])
+def deepseek_btn():
+    data= request.get_json()
+    deepseek_btn = str(data.get('deepseekBtn', True))
+    try:
+        # Ensure deepseek_btn is a boolean
+        print("Received deepseek_btn:", type(deepseek_btn))
+        if deepseek_btn not in ["True", "False"]:
+            return jsonify({"status": "error", "message": "Invalid button state"}), 400
+        
+        # Store the button state in the session
+        session["deepseek_tgl"] = deepseek_btn
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "success", "message": "DeepSeek button state updated"}), 200
+
+
+
+@app.route("/gemini-btn", methods=["POST"])
+def gemini_btn():
+    data= request.get_json()
+    gemini_btn = str(data.get('geminiBtn', True))
+    try:
+        # Ensure gemini_btn is a boolean
+        print("Received gemini_btn:", type(gemini_btn))
+        if gemini_btn not in ["True", "False"]:
+            return jsonify({"status": "error", "message": "Invalid button state"}), 400
+        
+        # Store the button state in the session
+        session["gemini_tgl"] = gemini_btn
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "success", "message": "Gemini button state updated"}), 200
+
+
+
+
 @app.route("/query", methods=["POST"])
 def query_page():
     qry = request.form.get("Query")
     email = session.get("userEmail")
     chat_id = session.get("chat_id")  # Get current chat_id from session
+    chatgpt_btn = session.get("chatgpt_tgl")
+    deepseek_btn = session.get("deepseek_tgl")
+    gemini_btn = session.get("gemini_tgl")
+    chatgpt_btn, deepseek_btn, gemini_btn = chatgpt_btn or "True", deepseek_btn or "True", gemini_btn or "True"
+    responseTxt, response2Txt, response3Txt = None, None, None
 
-    client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
-    response = client.models.generate_content(
-        model="gemini-2.0-flash", 
-        contents=[qry]
-    )
+    if (chatgpt_btn == "True"):
+        client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=[qry]
+        )
+        responseTxt = response.text
     
-    client2 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
-    response2 = client2.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=[qry]
-    )
+    if (deepseek_btn == "True"):
+        client2 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
+        response2 = client2.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[qry]
+        )
+        response2Txt = response2.text
     
-    client3 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
-    response3 = client3.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=[qry]
-    )
+    if (gemini_btn == "True"):
+        client3 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
+        response3 = client3.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[qry]
+        )
+        response3Txt = response3.text
     
     if email is not None and chat_id is not None:
         # Update the correct chat document by _id
@@ -189,9 +256,9 @@ def query_page():
             {"_id": ObjectId(chat_id)},
             {"$push": {
                 "queries": qry,
-                "response": response.text,
-                "response2": response2.text,
-                "response3": response3.text
+                "response": responseTxt,
+                "response2": response2Txt,
+                "response3": response3Txt
             }}
         )
     elif email is not None:
@@ -199,17 +266,17 @@ def query_page():
         collection.insert_one({
             "email": email,
             "queries": [qry],
-            "response": [response.text],
-            "response2": [response2.text],
-            "response3": [response3.text]
+            "response": [responseTxt],
+            "response2": [response2Txt],
+            "response3": [response3Txt]
         })
 
     return {
-        "response": response.text,
-        "response2": response2.text,
-        "response3": response3.text    
-        }   
-    
+        "response": responseTxt,
+        "response2": response2Txt,
+        "response3": response3Txt
+    }
+
     # return {"response": response.results[0].content}
     # return {"response": qry} 
 
