@@ -1,6 +1,8 @@
 var u_email = null;
 var u_name = null;
-
+var chatgptBtn = true; // Initialize chatgptBtn to true
+var deepseekBtn = true; // Initialize DeepSeekBtn to true
+var geminiBtn = true; // Initialize geminiBtn to true
 
 async function fetchUserEmail() {
 
@@ -45,9 +47,7 @@ async function deleteEmptyChats() {
 }
 
 async function main() {
-  var chatgptBtn = true; // Initialize chatgptBtn to true
-  var deepseekBtn = true; // Initialize DeepSeekBtn to true
-  var geminiBtn = true; // Initialize geminiBtn to true
+
   // Helper to render all chats in the sidebar
   async function renderSidebarChats(selectedChatId = null) {
     console.log('Rendering sidebar chats with selectedChatId:', selectedChatId);

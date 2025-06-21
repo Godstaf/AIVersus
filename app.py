@@ -50,6 +50,9 @@ cr.execute("USE AIVersus")
 
 @app.route("/")
 def index():
+    session["chatgpt_tgl"] = "True"
+    session["deepseek_tgl"] = "True"
+    session["gemini_tgl"] = "True"
     return render_template("index.html")
 
 
@@ -343,6 +346,7 @@ def loginit():
     # Get form data
     emailId = request.form.get("email")
     password = request.form.get("password")
+    print("password: ", password)
     if password is None:
         # Handle the error, e.g., return an error message
         return jsonify({"status": "error", "message": "Password cannot be empty"}), 401
