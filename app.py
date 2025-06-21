@@ -22,6 +22,7 @@ except Exception as e:
 
 app = Flask(__name__)
 app.secret_key = str(os.urandom(24))  # Generate a random secret key for session management
+print("secret key", app.secret_key)
 
 
 # Connect to MySQL database
