@@ -218,6 +218,10 @@ def gemini_btn():
 
 
 
+def qryValidation(qry):
+    pass
+    
+
 
 @app.route("/query", methods=["POST"])
 def query_page():

@@ -62,7 +62,7 @@ async function main() {
 
     let anySelected = false;
 
-    chats.forEach((chat) => {
+    chats.slice().reverse().forEach((chat) => {
       chat.title = chat.queries[0] || ""; // Get the first query as the title, or an empty string if not present
       const chatDiv = document.createElement("div");
       chatDiv.className = "sidebar-chat-entry";
