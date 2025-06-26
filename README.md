@@ -66,10 +66,12 @@ cd aiversus
    ```
 2. Set environment variables for MongoDB and MySQL in a `.env` file:
    ```env
-   MONGO_URI="mongodb://localhost:27017/your_database_name"
-   MYSQL_USER="your_mysql_user"
-   MYSQL_PASSWORD="your_mysql_password"
-   MYSQL_DB="your_mysql_db_name"
+   FLASK_SECRET_KEY="s3cr3tkey123456"
+   MYSQL_HOST="localhost"
+   MONGO_URI="mongodb://localhost:27017"
+   MYSQL_USER="root"
+   MYSQL_PASSWORD="krish113838G"
+   MYSQL_DB="AIVersus"
    ```
 3. Start the backend server:
    ```bash
