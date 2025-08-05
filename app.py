@@ -12,6 +12,8 @@ db = client["AIVersus"]
 collection = db["ChatHistory"]
 
 
+# mongodb to postgres complete migration
+
 
 # checking if mongodb connection is established
 try:
