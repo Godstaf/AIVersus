@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session
 from google import genai
-import mysql.connector as my
+import psycopg2 as my
 import hashlib
 import os
 import pymongo
@@ -10,6 +10,8 @@ uri = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(uri)
 db = client["AIVersus"]
 collection = db["ChatHistory"]
+
+
 
 # checking if mongodb connection is established
 try:
@@ -30,24 +32,18 @@ pwrd = "krish113838G"
 
 
 try:
-    mycon = my.connect(host='localhost',
-                       user='root',
-                       password=pwrd)
-
-except:
-    print("Wrong password!")
-    exit(0)
-
-if not mycon.is_connected():
-    print("Not able to connect to the server at this movement")
-    exit(0)
-    
-else:
+    mycon = my.connect(
+        host='localhost',
+        user='postgres',
+        password=pwrd,
+        dbname = 'aiversus'
+    )
     print("Connected")
+except my.Error as e:
+    print(f"Database connection failed: {e}")
+    exit(1)
 
 cr = mycon.cursor()
-cr.execute("CREATE DATABASE IF NOT EXISTS AIVersus")
-cr.execute("USE AIVersus")
 
 @app.route("/")
 def index():
@@ -316,20 +312,8 @@ def registerit():
 
     
     try:
-        # Create the table if it doesn't exist
-        cr.execute(
-            """
-            CREATE TABLE IF NOT EXISTS user (
-                name VARCHAR(200), 
-                email VARCHAR(500), 
-                password VARCHAR(10240),
-                PRIMARY KEY (email)
-            )
-            """
-        )
-
         # Use parameterized query to insert data
-        query = "INSERT INTO user (name, email, password) VALUES (%s, %s, %s)"
+        query = "INSERT INTO \"user\" (name, email, password) VALUES (%s, %s, %s)"
         values = (name, emailId, hashed_password)
         cr.execute(query, values)
 
@@ -356,7 +340,7 @@ def loginit():
         # Handle the error, e.g., return an error message
         return jsonify({"status": "error", "message": "Password cannot be empty"}), 401
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    query = "SELECT * FROM user WHERE email = %s AND password = %s"
+    query = "SELECT * FROM \"user\" WHERE email = %s AND password = %s"
     values = (emailId, hashed_password)
     cr.execute(query, values)
     result = cr.fetchone()
