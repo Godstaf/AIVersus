@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, jsonify, session
 from google import genai
-import psycopg2 as my
+import psycopg2 as ps
 import hashlib
 import os
 import pymongo
 from bson import ObjectId
+import postgresExtraFuncs as eFuncs
 
 uri = 'mongodb://localhost:27017'
 client = pymongo.MongoClient(uri)
@@ -34,14 +35,14 @@ pwrd = "krish113838G"
 
 
 try:
-    mycon = my.connect(
+    mycon = ps.connect(
         host='localhost',
         user='postgres',
         password=pwrd,
         dbname = 'aiversus'
     )
     print("Connected")
-except my.Error as e:
+except ps.Error as e:
     print(f"Database connection failed: {e}")
     exit(1)
 
@@ -61,10 +62,12 @@ def new_chat():
     email = session.get("userEmail")
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401
-    collection.insert_one({
-        "email": email,
-        "queries": [],
-        "response": []
+    eFuncs.insert_one({
+        "email"    : email,
+        "queries"  : [],
+        "response" : [],
+        "response2": [],
+        "response3": []
     })
     chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
     if chat_doc is not None:
@@ -87,11 +90,11 @@ def get_all_chats():
         return jsonify({
             "status": "success",
             "chats": [{
-                "chat_id": str(doc["_id"]),
-                "queries": doc.get("queries", []),
-                "response": doc.get("response", []),
-                "response2": doc.get("response2", []),
-                "response3": doc.get("response3", [])
+                "chat_id"   : str(doc["_id"]),
+                "queries"   : doc.get("queries", []),
+                "response"  : doc.get("response", []),
+                "response2" : doc.get("response2", []),
+                "response3" : doc.get("response3", [])
             } for doc in user_docs]
         }), 200
     else:
@@ -109,25 +112,24 @@ def get_chat_history():
     if chat_id:
         session["chat_id"] = chat_id  # Set the current chat_id in session
 
-    user_doc = list(collection.find({"email": email}))
-    chatIdIndx = None
+    current_chat_id = session.get("chat_id")
+    if not current_chat_id:
+        return jsonify({"status": "error", "message": "No chat selected"}), 400
 
-    if user_doc:
-        for i in range(len(user_doc)-1, -1, -1):
-            if str(user_doc[i].get("_id")) == session.get("chat_id"):
-                chatIdIndx = i
-                break
+    try:
+        # Fetch the specific chat document directly using its _id and email for security
+        chat_doc = collection.find_one({"_id": ObjectId(current_chat_id), "email": email})
+    except Exception:
+        return jsonify({"status": "error", "message": "Invalid chat ID format"}), 400
 
-        if chatIdIndx is not None:
-            return jsonify({
-                "status": "success",
-                "queries": user_doc[chatIdIndx].get("queries", []),
-                "response": user_doc[chatIdIndx].get("response", []),
-                "response2": user_doc[chatIdIndx].get("response2", []),
-                "response3": user_doc[chatIdIndx].get("response3", [])
-            }), 200
-        else:
-            return jsonify({"status": "error", "message": "No chat history found for this chat ID"}), 404
+    if chat_doc:
+        return jsonify({
+            "status": "success",
+            "queries": chat_doc.get("queries", []),
+            "response": chat_doc.get("response", []),
+            "response2": chat_doc.get("response2", []),
+            "response3": chat_doc.get("response3", [])
+        }), 200
     else:
         return jsonify({"status": "error", "message": "No chat history found"}), 404
 
