@@ -1,5 +1,6 @@
 import psycopg2 as ps
 from datetime import datetime
+import uuid
 
 
 # Connect to MySQL database
@@ -21,6 +22,17 @@ except ps.Error as e:
 
 cr = mycon.cursor()
 
+def genUUID():
+    while True:
+        generated_uuid = str(uuid.uuid4())
+        cr.execute('SELECT COUNT(*) FROM "chat_history" WHERE id = %s', (generated_uuid,))
+        result = cr.fetchone()
+        if result is not None and result[0] == 0:
+            return generated_uuid
+
+
+
+
 def insert_one(doc):
     # print(type(doc))
     
@@ -37,9 +49,10 @@ def insert_one(doc):
     print('\n', type(email), type(queries), type(response), type(response2), type(response3), sep = '\n', end = '\n\n')
     
     try:
-        insrtQry = "INSERT INTO \"chat_history\" (user_email, queries, response, response2, response3, last_updated) VALUES (%s, %s, %s, %s, %s, %s)"
+        new_uuid = genUUID()
+        insrtQry = "INSERT INTO \"chat_history\" (id, user_email, queries, response, response2, response3, last_updated) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         
-        cr.execute(insrtQry, (email, queries, response, response2, response3, last_updated))
+        cr.execute(insrtQry, (new_uuid, email, queries, response, response2, response3, last_updated))
         mycon.commit()
 
         print("insert_one ran successfully!")        
@@ -47,7 +60,7 @@ def insert_one(doc):
         
     except Exception as e:
         print("insert_one Error:", e)
-        
+        mycon.rollback()
     
     
 
