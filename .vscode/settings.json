@@ -1,3 +1,6 @@
 {
-    "python.analysis.typeCheckingMode": "standard"
+    "python.analysis.typeCheckingMode": "standard",
+    "editor.fontSize": 16,
+    "files.autoSave": "afterDelay",
+    "editor.mouseWheelZoom": true
 }
