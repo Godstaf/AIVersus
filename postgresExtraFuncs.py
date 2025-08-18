@@ -75,7 +75,7 @@ def find_one(id, email):
         fetchedResult = cr.fetchone()
         if fetchedResult:
             result = {"id": fetchedResult[0], "email": fetchedResult[1], "queries": fetchedResult[2], "response": fetchedResult[3], "response2": fetchedResult[4], "response3": fetchedResult[5]}
-            print("Result found:", result)
+            # print("Result found:", result)
         else:
             print("Result not found")
             
@@ -95,7 +95,7 @@ def findAll(email):
         if result:
             for i in range(len(result)):
                 result[i] = {"id": result[i][0], "email": result[i][1], "queries": result[i][2], "response": result[i][3], "response2": result[i][4], "response3": result[i][5]} # type: ignore
-            print("Result found:", result)
+            # print("Result found:", result)
         else:
             print("Result not found")
             
