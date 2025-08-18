@@ -3,26 +3,10 @@ from google import genai
 import psycopg2 as ps
 import hashlib
 import os
-import pymongo
 from bson import ObjectId
 import postgresExtraFuncs as eFuncs
 
-uri = 'mongodb://localhost:27017'
-client = pymongo.MongoClient(uri)
-db = client["AIVersus"]
-collection = db["ChatHistory"]
 
-
-# mongodb to postgres complete migration
-
-
-# checking if mongodb connection is established
-try:
-    client.admin.command('ping')
-    print("MongoDB connection established.")
-except Exception as e:
-    print("MongoDB connection failed:", e)
-    exit(0)
 
 
 app = Flask(__name__)
@@ -69,7 +53,6 @@ def new_chat():
         "response2": [],
         "response3": []
     })
-    # chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
     if chat_id is not None:
         session["chat_id"] = str(chat_id)
         return jsonify({"status": "success", "message": "New chat created", "chat_id": chat_id}), 200
@@ -85,17 +68,17 @@ def get_all_chats():
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401
     # Fetch all chat history for the user from MongoDB
-    user_docs = list(collection.find({"email": email}))  # Convert cursor to list
+    user_docs = list(eFuncs.findAll(email) or [])  # Convert cursor to list
     if user_docs:
         return jsonify({
             "status": "success",
             "chats": [{
-                "chat_id"   : str(doc["_id"]),
+                "chat_id"   : str(doc["id"]), # type: ignore
                 "queries"   : doc.get("queries", []),
                 "response"  : doc.get("response", []),
                 "response2" : doc.get("response2", []),
                 "response3" : doc.get("response3", [])
-            } for doc in user_docs]
+            } for doc in user_docs if isinstance(doc, dict)]
         }), 200
     else:
         return jsonify({"status": "error", "message": "No chat history found"}), 404
@@ -118,7 +101,7 @@ def get_chat_history():
 
     try:
         # Fetch the specific chat document directly using its _id and email for security
-        chat_doc = collection.find_one({"_id": ObjectId(current_chat_id), "email": email})
+        chat_doc = eFuncs.find_one(id = current_chat_id, email = email)
     except Exception:
         return jsonify({"status": "error", "message": "Invalid chat ID format"}), 400
 
@@ -141,16 +124,10 @@ def delete_empty_chats():
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401  
     # Delete all chats for the user that have no queries or response
-    result = collection.delete_many({
-        "email": email,
-        "$or": [
-            {"queries": {"$size": 0}},
-            {"response": {"$size": 0}},
-            {"response2": {"$size": 0}},
-            {"response3": {"$size": 0}}
-        ]
-    })
-    return jsonify({"status": "success", "message": f"{result.deleted_count} empty chats deleted."}), 200
+    
+    
+    result = eFuncs.delete_many(email)
+    return jsonify({"status": "success", "message": f"{result} empty chats deleted."}), 200
 
 
 
@@ -260,18 +237,15 @@ def query_page():
     
     if email is not None and chat_id is not None:
         # Update the correct chat document by _id
-        collection.update_one(
-            {"_id": ObjectId(chat_id)},
-            {"$push": {
-                "queries": qry,
-                "response": responseTxt,
-                "response2": response2Txt,
-                "response3": response3Txt
-            }}
-        )
+        
+        
+        eFuncs.update_one(id = chat_id, email = email, qry = qry or '', rep = responseTxt or '', rep2 = response2Txt or '', rep3 = response3Txt or '')
+        
+        
+        
     elif email is not None:
         # Fallback: create new document if chat_id/session is missing
-        collection.insert_one({
+        eFuncs.insert_one({
             "email": email,
             "queries": [qry],
             "response": [responseTxt],

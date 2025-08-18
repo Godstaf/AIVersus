@@ -68,24 +68,26 @@ def insert_one(doc):
 
 
 def find_one(id, email):
+    result = None
     try:
         findQry = "Select id, user_email, queries, response, response2, response3 from chat_history where id = %s and user_email = %s"
         cr.execute(findQry, (id, email))
-        result = cr.fetchone()
-        if result:
-            result = {"id": result[0], "email": result[1], "queries": result[2], "response": result[3], "response2": result[4], "response3": result[5]}
+        fetchedResult = cr.fetchone()
+        if fetchedResult:
+            result = {"id": fetchedResult[0], "email": fetchedResult[1], "queries": fetchedResult[2], "response": fetchedResult[3], "response2": fetchedResult[4], "response3": fetchedResult[5]}
             print("Result found:", result)
         else:
             print("Result not found")
             
-        return(result)
     except Exception as e:
         print("find_one Error:", e)
         mycon.rollback()
-        return None
+    
+    return result
     
 
 def findAll(email):
+    result = None
     try:
         findQry = "Select id, user_email, queries, response, response2, response3 from chat_history where user_email = %s"
         cr.execute(findQry, (email,))
@@ -97,11 +99,13 @@ def findAll(email):
         else:
             print("Result not found")
             
-        return(result)
     except Exception as e:
         print("findAll Error:", e)
         mycon.rollback()
-        return None
+        
+    return result
+
+
 
 def update_one(id, email, qry='', rep='', rep2='', rep3=''):
     
@@ -127,7 +131,7 @@ def delete_many(email):
         cr.execute(delQry, (email, ))
         mycon.commit()
         print("deleted successfully!")
-        return True
+        return 'Deletion successful'
         
     except Exception as e:
         print("delete_many error:", e)
