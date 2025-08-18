@@ -55,25 +55,82 @@ def insert_one(doc):
         cr.execute(insrtQry, (new_uuid, email, queries, response, response2, response3, last_updated))
         mycon.commit()
 
-        print("insert_one ran successfully!")        
+        print("insert_one ran successfully!")
+        return new_uuid
         
         
     except Exception as e:
         print("insert_one Error:", e)
         mycon.rollback()
+        return None
     
     
 
 
-def find_one():
+def find_one(id, email):
+    try:
+        findQry = "Select id, user_email, queries, response, response2, response3 from chat_history where id = %s and user_email = %s"
+        cr.execute(findQry, (id, email))
+        result = cr.fetchone()
+        if result:
+            result = {"id": result[0], "email": result[1], "queries": result[2], "response": result[3], "response2": result[4], "response3": result[5]}
+            print("Result found:", result)
+        else:
+            print("Result not found")
+            
+        return(result)
+    except Exception as e:
+        print("find_one Error:", e)
+        mycon.rollback()
+        return None
     
-    pass
 
-def findAll():
-    pass
+def findAll(email):
+    try:
+        findQry = "Select id, user_email, queries, response, response2, response3 from chat_history where user_email = %s"
+        cr.execute(findQry, (email,))
+        result = cr.fetchall()
+        if result:
+            for i in range(len(result)):
+                result[i] = {"id": result[i][0], "email": result[i][1], "queries": result[i][2], "response": result[i][3], "response2": result[i][4], "response3": result[i][5]} # type: ignore
+            print("Result found:", result)
+        else:
+            print("Result not found")
+            
+        return(result)
+    except Exception as e:
+        print("findAll Error:", e)
+        mycon.rollback()
+        return None
 
-def update_one():
-    pass
+def update_one(id, email, qry='', rep='', rep2='', rep3=''):
+    
+    # Demo query
+    """UPDATE chat_history SET queries = array_append(queries, 'This is a new query string.') WHERE id = 'e2f03b78-f0c1-40ce-a95d-26d54acc863e"""
+    
+    updateQry = "UPDATE chat_history SET queries = array_append(queries, %s), response = array_append(response, %s), response2 = array_append(response2, %s), response3 = array_append(response3, %s), last_updated = %s WHERE id = %s"
+    try:
+        cr.execute(updateQry, (qry, rep, rep2, rep3, datetime.now(), id))
+        mycon.commit()
+        print("update_one ran successfully!")
+        return True
 
-def delete_many():
-    pass
+    except Exception as e:
+        print("update_one error:", e)
+        mycon.rollback
+        return None
+    
+
+def delete_many(email):
+    try:
+        delQry = "Delete from chat_history where user_email = %s and queries = \'{}\'"
+        cr.execute(delQry, (email, ))
+        mycon.commit()
+        print("deleted successfully!")
+        return True
+        
+    except Exception as e:
+        print("delete_many error:", e)
+        mycon.rollback()
+        return None
+

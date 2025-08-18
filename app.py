@@ -62,17 +62,17 @@ def new_chat():
     email = session.get("userEmail")
     if not email:
         return jsonify({"status": "error", "message": "User not logged in"}), 401
-    eFuncs.insert_one({
+    chat_id = eFuncs.insert_one({
         "email"    : email,
         "queries"  : [],
         "response" : [],
         "response2": [],
         "response3": []
     })
-    chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
-    if chat_doc is not None:
-        session["chat_id"] = str(chat_doc["_id"])
-        return jsonify({"status": "success", "message": "New chat created", "chat_id": str(chat_doc["_id"])}), 200
+    # chat_doc = collection.find_one({"email": email}, sort=[("_id", -1)])
+    if chat_id is not None:
+        session["chat_id"] = str(chat_id)
+        return jsonify({"status": "success", "message": "New chat created", "chat_id": chat_id}), 200
     else:
         session["chat_id"] = None
         return jsonify({"status": "error", "message": "Failed to create chat"}), 500
