@@ -125,6 +125,21 @@ def update_one(id, email, qry='', rep='', rep2='', rep3=''):
         return None
     
 
+def delete_one(chat_id, email):
+    """Delete a single chat by its ID and user email"""
+    try:
+        delQry = "DELETE FROM chat_history WHERE id = %s AND user_email = %s"
+        cr.execute(delQry, (chat_id, email))
+        mycon.commit()
+        print(f"Chat {chat_id} deleted successfully!")
+        return True
+        
+    except Exception as e:
+        print("delete_one error:", e)
+        mycon.rollback()
+        return None
+
+
 def delete_many(email):
     try:
         delQry = "Delete from chat_history where user_email = %s and queries = \'{}\'"

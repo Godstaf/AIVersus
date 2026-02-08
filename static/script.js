@@ -66,8 +66,55 @@ async function main() {
       chat.title = chat.queries[0] || ""; // Get the first query as the title, or an empty string if not present
       const chatDiv = document.createElement("div");
       chatDiv.className = "sidebar-chat-entry";
-      chatDiv.innerText = chat.title || "New Chat";
       chatDiv.dataset.chatId = chat.chat_id;
+
+      // Create span for chat title text
+      const chatTitleSpan = document.createElement("span");
+      chatTitleSpan.className = "chat-title-text";
+      chatTitleSpan.innerText = chat.title || "New Chat";
+      chatDiv.appendChild(chatTitleSpan);
+
+      // Create delete icon
+      const deleteIcon = document.createElement("i");
+      deleteIcon.className = "fa-solid fa-trash delete-chat-icon";
+      deleteIcon.title = "Delete chat";
+      deleteIcon.addEventListener("click", async function (event) {
+        event.stopPropagation(); // Prevent triggering chat selection
+
+        // Call delete API
+        try {
+          const response = await fetch("/delete_chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ chat_id: chat.chat_id })
+          });
+
+          if (response.status === 200) {
+            console.log("Chat deleted successfully:", chat.chat_id);
+            // Remove the chat div from sidebar
+            chatDiv.remove();
+
+            // If deleted chat was active, select another one
+            if (chatDiv.classList.contains("active-chat")) {
+              const remainingChats = document.querySelectorAll(".sidebar-chat-entry");
+              if (remainingChats.length > 0) {
+                remainingChats[0].classList.add("active-chat");
+                loadChatHistory(remainingChats[0].dataset.chatId);
+              } else {
+                // No chats left, create a new one
+                await createNewChat();
+              }
+            }
+          } else {
+            console.error("Error deleting chat:", await response.text());
+          }
+        } catch (error) {
+          console.error("Error deleting chat:", error);
+        }
+      });
+      chatDiv.appendChild(deleteIcon);
 
       // Highlight if this is the selected chat
       // console.log('Selected chat ID:', selectedChatId);

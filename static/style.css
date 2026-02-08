@@ -471,24 +471,34 @@ img{
   box-sizing: border-box;
   padding: 8px 12px;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.sidebar-chat-entry.active-chat {
-  background: #23244a !important; /* Bluish highlight */
-  color: #fff !important;
-  font-weight: bold;
-  border-radius: 6px;
+.chat-title-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Remove default focus/active/hover styles */
-.sidebar-chat-entry:focus,
-.sidebar-chat-entry:active,
-.sidebar-chat-entry:hover {
-  background: none;
-  color: inherit;
-  outline: none;
+.delete-chat-icon {
+  opacity: 0;
+  color: #888;
+  font-size: 0.85rem;
+  padding: 4px;
+  margin-left: 8px;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
+.sidebar-chat-entry:hover .delete-chat-icon {
+  opacity: 1;
+}
+
+.delete-chat-icon:hover {
+  color: #ff5555;
+}
 
 .sidebar-chat-entry.active-chat {
   background: #23244a !important; /* Bluish highlight */

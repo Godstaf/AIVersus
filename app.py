@@ -1,10 +1,19 @@
 from flask import Flask, render_template, request, jsonify, session
 from google import genai
+from openai import OpenAI
 import psycopg2 as ps
 import hashlib
 import os
+import time
 from bson import ObjectId
 import postgresExtraFuncs as eFuncs
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# OpenAI client for ChatGPT responses
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 
@@ -14,8 +23,8 @@ app.secret_key = str(os.urandom(24))  # Generate a random secret key for session
 print("secret key", app.secret_key)
 
 
-# Connect to MySQL database
-pwrd = "krish113838G"
+# Connect to PostgreSQL database
+pwrd = os.getenv("DB_PASSWORD")
 
 
 try:
@@ -130,6 +139,24 @@ def delete_empty_chats():
     return jsonify({"status": "success", "message": f"{result} empty chats deleted."}), 200
 
 
+@app.route("/delete_chat", methods=["POST"])
+def delete_chat():
+    email = session.get("userEmail")
+    if not email:
+        return jsonify({"status": "error", "message": "User not logged in"}), 401
+    
+    data = request.get_json()
+    chat_id = data.get("chat_id")
+    
+    if not chat_id:
+        return jsonify({"status": "error", "message": "Chat ID is required"}), 400
+    
+    result = eFuncs.delete_one(chat_id, email)
+    if result:
+        return jsonify({"status": "success", "message": "Chat deleted successfully"}), 200
+    else:
+        return jsonify({"status": "error", "message": "Failed to delete chat"}), 500
+
 
 @app.route("/register", methods=["POST", "GET"])
 def register_page():
@@ -195,9 +222,29 @@ def gemini_btn():
 
 
 
-def qryValidation(qry):
-    pass
+
+
+def get_chat_history_for_prompt():
+    """Helper function to get chat history as a string for AI prompts"""
+    email = session.get("userEmail")
+    chat_id = session.get("chat_id")
     
+    if not email or not chat_id:
+        return "{}"
+    
+    try:
+        import json
+        chat_doc = eFuncs.find_one(id=chat_id, email=email)
+        if chat_doc:
+            return json.dumps({
+                "queries": chat_doc.get("queries", []),
+                "response": chat_doc.get("response", []),
+                "response2": chat_doc.get("response2", []),
+                "response3": chat_doc.get("response3", [])
+            })
+    except Exception:
+        pass
+    return "{}"
 
 
 @app.route("/query", methods=["POST"])
@@ -212,28 +259,48 @@ def query_page():
     responseTxt, response2Txt, response3Txt = None, None, None
 
     if (chatgpt_btn == "True"):
-        client = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
-        response = client.models.generate_content(
-            model="gemini-2.0-flash", 
-            contents=[qry]
-        )
-        responseTxt = response.text
+        # Using Gemini API for ChatGPT responses (OpenAI key has no model access)
+        try:
+            qrygpt = "You are response1 (or just response). Past chat in form of json: " + get_chat_history_for_prompt() + "\n\n Current Query: " + qry
+            
+
+            client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            response = client.models.generate_content(
+                model="gemini-3-flash-preview", 
+                contents=[qrygpt]
+            )
+            responseTxt = response.text
+        except Exception as e:
+            print(f"Gemini Error (ChatGPT): {e}")
+            responseTxt = "⚠️ Rate limit exceeded. Please wait a minute and try again."
     
     if (deepseek_btn == "True"):
-        client2 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
-        response2 = client2.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[qry]
-        )
-        response2Txt = response2.text
+        time.sleep(2)  # Delay to avoid rate limiting with same API key
+        try:
+            qryDp = "You are response2 (or just response). Past chat in form of json: " + get_chat_history_for_prompt() + "\n\n Current Query: " + qry
+            client2 = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            response2 = client2.models.generate_content(
+                model="gemini-3-flash-preview",
+                contents=[qryDp]
+            )
+            response2Txt = response2.text
+        except Exception as e:
+            print(f"Gemini Error (DeepSeek): {e}")
+            response2Txt = "⚠️ Rate limit exceeded. Please wait a minute and try again."
     
     if (gemini_btn == "True"):
-        client3 = genai.Client(api_key="AIzaSyDLtRhhQTS05XcusmCaYX0m-NHEJK_Wq88")
-        response3 = client3.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[qry]
-        )
-        response3Txt = response3.text
+        time.sleep(2)  # Delay to avoid rate limiting with same API key
+        try:
+            qryGem = "You are response3 (or just response). Past chat in form of json: " + get_chat_history_for_prompt() + "\n\n Current Query: " + qry
+            client3 = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            response3 = client3.models.generate_content(
+                model="gemini-3-flash-preview",
+                contents=[qryGem]
+            )
+            response3Txt = response3.text
+        except Exception as e:
+            print(f"Gemini Error (Gemini): {e}")
+            response3Txt = "⚠️ Rate limit exceeded. Please wait a minute and try again."
     
     if email is not None and chat_id is not None:
         # Update the correct chat document by _id
