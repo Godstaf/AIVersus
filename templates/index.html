@@ -107,10 +107,10 @@
   </div>
 
   <div class="formContainer">
-    <form action="{{ url_for('query_page') }}" method="POST" data-query-url="{{ url_for('query_page') }}">
+    <form action="{{ url_for('debate') }}" method="POST" data-query-url="{{ url_for('debate') }}">
 
       <div class="bottom-textbox">
-        <textarea class="textarea" placeholder="Type your message here..." name="Query" id="qry"></textarea>
+        <textarea class="textarea" placeholder="Enter a debate topic (e.g., 'Should AI replace teachers?')" name="Query" id="qry"></textarea>
 
         <div class="below-search">
           <div class="chat-bots-buttons">

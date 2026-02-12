@@ -519,123 +519,189 @@ async function main() {
 
 
 
-
   document.querySelector("form").addEventListener("submit", async function (event) {
-    // console.log('Form submitted'); // Log form submission for debugging
-    event.preventDefault(); // Prevent the form from reloading the page
+    event.preventDefault();
 
-    // Add the query in .convo div
     const convoDiv = document.querySelector(".convo");
+    const queryText = document.getElementById("qry").value;
+
+    // Add the query/topic to conversation
     const newDiv = document.createElement("div");
-    newDiv.className = "query-container"; // Add a class to the new div
-    newDiv.innerText = document.getElementById("qry").value; // Set the query text
-    console.log(document.getElementById("qry").value)
-    convoDiv.appendChild(newDiv); // Append the new div to .convo
+    newDiv.className = "query-container";
+    newDiv.innerHTML = `<strong>🎯 Debate Topic:</strong> ${queryText}`;
+    convoDiv.appendChild(newDiv);
 
+    const formData = new FormData(this);
+    const queryUrl = this.getAttribute("data-query-url");
+    document.getElementById("qry").value = "";
 
-    const formData = new FormData(this); // Get form data
-    const queryUrl = this.getAttribute("data-query-url"); // Get the query URL from the form attribute
-    document.getElementById("qry").value = ""; // Clear the input field
-
-
-    sendBtn = document.querySelector(".btn-search");
+    const sendBtn = document.querySelector(".btn-search");
     sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
     sendBtn.disabled = true;
 
     const inputField = document.getElementById("qry");
-    inputField.disabled = true; // Disable the input field to prevent Enter key submission
+    inputField.disabled = true;
 
+    // Add loading indicator
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "debate-loading";
+    loadingDiv.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting debate... (this may take a minute)';
+    loadingDiv.style.cssText = "padding: 20px; text-align: center; color: #888; font-style: italic;";
+    convoDiv.appendChild(loadingDiv);
 
-    // Add the response to the .convo div
     try {
       const apiCall = await fetch(queryUrl, {
         method: "POST",
         body: formData,
       });
-      const response = await apiCall.json(); // Get the response text
-      const output = response.response;
-      const output2 = response.response2;
-      const output3 = response.response3;
-      console.log('Response:', output); // Log the response for debugging
-      console.log('Response2:', output2); // Log the response for debugging
-      console.log('Response3:', output3); // Log the response for debugging
-      // alert(x.response)
+      const response = await apiCall.json();
 
-      const wholeResponseContainer = document.createElement("div");
-      wholeResponseContainer.className = "whole-res-container";
+      // Remove loading indicator
+      loadingDiv.remove();
 
-      // Add the response in .convo div
-      if (output) {
-        const convoDiv = document.querySelector(".convo");
-        const newDiv = document.createElement("div");
-        newDiv.className = "response-container";
+      // Check if topic was not debatable
+      if (response.status === "not_debatable") {
+        const notDebatableDiv = document.createElement("div");
+        notDebatableDiv.className = "response-container not-debatable";
+        notDebatableDiv.innerHTML = `
+          <nav class="response-nav" style="background: #ff6b6b;">⚠️ Not Debatable</nav>
+          <div class="response-content">
+            <strong>Reason:</strong> ${response.reason}<br><br>
+            ${response.suggested_topic ? `<strong>Try instead:</strong> "${response.suggested_topic}"` : ''}
+          </div>
+        `;
+        convoDiv.appendChild(notDebatableDiv);
+      }
+      // Render debate rounds
+      else if (response.status === "success") {
+        const rounds = response.rounds || [];
 
-        const responseNav = document.createElement("nav");
-        responseNav.className = "response-nav";
-        responseNav.innerText = "Chat-Gpt"
-        newDiv.appendChild(responseNav);
+        // Render each round
+        rounds.forEach((round, index) => {
+          const roundContainer = document.createElement("div");
+          roundContainer.className = "debate-round";
 
-        const responseContent = document.createElement("div");
-        responseContent.className = "response-content";
-        responseContent.innerText = response.response;
-        newDiv.appendChild(responseContent)
+          // Round header
+          const roundHeader = document.createElement("div");
+          roundHeader.className = "round-header";
+          roundHeader.innerHTML = `<h3>📢 Round ${round.round}</h3>`;
+          roundHeader.style.cssText = "background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; margin-top: 20px;";
+          roundContainer.appendChild(roundHeader);
 
+          const wholeResponseContainer = document.createElement("div");
+          wholeResponseContainer.className = "whole-res-container";
 
-        wholeResponseContainer.appendChild(newDiv);
+          // FOR Agent (Green)
+          if (round.for) {
+            const forDiv = document.createElement("div");
+            forDiv.className = "response-container for-agent";
+            forDiv.innerHTML = `
+              <nav class="response-nav" style="background: linear-gradient(135deg, #11998e, #38ef7d);">🟢 FOR</nav>
+              <div class="response-content">${round.for}</div>
+            `;
+            wholeResponseContainer.appendChild(forDiv);
+          }
+
+          // AGAINST Agent (Red)
+          if (round.against) {
+            const againstDiv = document.createElement("div");
+            againstDiv.className = "response-container against-agent";
+            againstDiv.innerHTML = `
+              <nav class="response-nav" style="background: linear-gradient(135deg, #eb3349, #f45c43);">🔴 AGAINST</nav>
+              <div class="response-content">${round.against}</div>
+            `;
+            wholeResponseContainer.appendChild(againstDiv);
+          }
+
+          // BALANCED Agent (Yellow/Gold)
+          if (round.balanced) {
+            const balancedDiv = document.createElement("div");
+            balancedDiv.className = "response-container balanced-agent";
+            balancedDiv.innerHTML = `
+              <nav class="response-nav" style="background: linear-gradient(135deg, #f7971e, #ffd200);">🟡 BALANCED</nav>
+              <div class="response-content">${round.balanced}</div>
+            `;
+            wholeResponseContainer.appendChild(balancedDiv);
+          }
+
+          roundContainer.appendChild(wholeResponseContainer);
+          convoDiv.appendChild(roundContainer);
+        });
+
+        // Render Judge Verdict
+        const verdict = response.verdict;
+        if (verdict) {
+          const verdictContainer = document.createElement("div");
+          verdictContainer.className = "judge-verdict";
+          verdictContainer.style.cssText = "margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; border: 2px solid gold;";
+
+          // Winner banner
+          const winnerEmoji = verdict.winner === "FOR" ? "🟢" : verdict.winner === "AGAINST" ? "🔴" : verdict.winner === "BALANCED" ? "🟡" : "🤝";
+
+          let scoresHTML = "";
+          if (verdict.scores) {
+            const scores = verdict.scores;
+            scoresHTML = `
+              <div style="display: flex; justify-content: space-around; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+                <div style="text-align: center; padding: 10px; background: rgba(17,153,142,0.2); border-radius: 8px; min-width: 100px;">
+                  <div style="color: #38ef7d;">🟢 FOR</div>
+                  <div style="font-size: 24px; font-weight: bold;">${scores.for?.total || '?'}/30</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: rgba(235,51,73,0.2); border-radius: 8px; min-width: 100px;">
+                  <div style="color: #f45c43;">🔴 AGAINST</div>
+                  <div style="font-size: 24px; font-weight: bold;">${scores.against?.total || '?'}/30</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: rgba(247,151,30,0.2); border-radius: 8px; min-width: 100px;">
+                  <div style="color: #ffd200;">🟡 BALANCED</div>
+                  <div style="font-size: 24px; font-weight: bold;">${scores.balanced?.total || '?'}/30</div>
+                </div>
+              </div>
+            `;
+          }
+
+          let remarksHTML = "";
+          if (verdict.remarks) {
+            remarksHTML = `
+              <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <strong>📝 Judge's Remarks:</strong><br>
+                <div style="color: #38ef7d; margin-top: 8px;">FOR: ${verdict.remarks.for || 'No remarks'}</div>
+                <div style="color: #f45c43; margin-top: 8px;">AGAINST: ${verdict.remarks.against || 'No remarks'}</div>
+                <div style="color: #ffd200; margin-top: 8px;">BALANCED: ${verdict.remarks.balanced || 'No remarks'}</div>
+              </div>
+            `;
+          }
+
+          verdictContainer.innerHTML = `
+            <div style="text-align: center; margin-bottom: 15px;">
+              <span style="font-size: 28px;">⚖️</span>
+              <h2 style="color: gold; margin: 5px 0;">JUDGE'S VERDICT</h2>
+            </div>
+            <div style="text-align: center; font-size: 32px; margin: 15px 0;">
+              ${winnerEmoji} <span style="color: gold; font-weight: bold;">${verdict.winner}</span> WINS!
+            </div>
+            ${scoresHTML}
+            <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+              <strong>💬 Reasoning:</strong> ${verdict.reasoning || 'No reasoning provided.'}
+            </div>
+            ${remarksHTML}
+          `;
+
+          convoDiv.appendChild(verdictContainer);
+        }
       }
 
-
-      // Add the second response
-      if (output2) {
-        const newDiv2 = document.createElement("div");
-        newDiv2.className = "response-container";
-        const responseNav2 = document.createElement("nav");
-        responseNav2.className = "response-nav";
-        responseNav2.innerText = "DeepSeek";
-        newDiv2.appendChild(responseNav2);
-
-        const responseContent2 = document.createElement("div");
-        responseContent2.className = "response-content";
-        responseContent2.innerText = response.response2;
-        newDiv2.appendChild(responseContent2)
-
-        wholeResponseContainer.appendChild(newDiv2);
-      }
-
-
-      // Add the third response
-      if (output3) {
-        const newDiv3 = document.createElement("div");
-        newDiv3.className = "response-container";
-        const responseNav3 = document.createElement("nav");
-        responseNav3.className = "response-nav";
-        responseNav3.innerText = "Gemini";
-        newDiv3.appendChild(responseNav3);
-
-        const responseContent3 = document.createElement("div");
-        responseContent3.className = "response-content";
-        responseContent3.innerText = response.response3;
-        newDiv3.appendChild(responseContent3)
-
-        wholeResponseContainer.appendChild(newDiv3);
-      }
-
-      convoDiv.appendChild(wholeResponseContainer); // Append the new div to .convo
-
-      // Re-enable the send button and Enter key
+      // Re-enable controls
       sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
       sendBtn.disabled = false;
-      inputField.disabled = false; // Re-enable the input field
-
-
+      inputField.disabled = false;
 
     } catch (error) {
       console.error("Error:", error);
-      // alert("An error occurred. Please try again.");
+      loadingDiv.remove();
+
       let ErrorDiv = document.createElement('div');
       ErrorDiv.classList.add('error-div');
       ErrorDiv.classList.add('response-container');
-
       ErrorDiv.innerHTML = `
         <i class="fa-solid fa-triangle-exclamation"></i>
         An error occurred. Please try again.
