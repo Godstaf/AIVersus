@@ -2,13 +2,14 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color:  #0F101B;
+    background-color: #0F101B;
     overflow: auto;
-    scrollbar-width: none; 
+    scrollbar-width: none;
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Full viewport height */
-    overflow: hidden; 
+    height: 100vh;
+    /* Full viewport height */
+    overflow: hidden;
 }
 
 html body {
@@ -27,7 +28,7 @@ html body {
     z-index: 3;
 }
 
-#logo{
+#logo {
     text-align: center;
 }
 
@@ -43,9 +44,9 @@ html body {
     color: #ffffff;
     align-items: center;
     border-bottom: 1px solid #080A10;
-} 
+}
 
-.nav-title{
+.nav-title {
     margin: 0 auto;
 }
 
@@ -56,7 +57,7 @@ html body {
     text-align: center;
 }
 
-.history-tab{
+.history-tab {
     display: flex;
     position: absolute;
     left: 20px;
@@ -71,6 +72,7 @@ html body {
     position: absolute;
     right: 20px;
 }
+
 /* .nav-links li:hover{
     border-bottom: 2px solid white;
 } */
@@ -106,10 +108,11 @@ html body {
     display: flex;
     justify-content: center;
     align-items: center;
-} 
+}
+
 /* allgood */
 
-form{
+form {
     height: 140px;
     width: 100%;
     display: flex;
@@ -117,7 +120,7 @@ form{
     align-items: center;
 }
 
-.bottom-textbox{
+.bottom-textbox {
     width: 60%;
     max-height: 140px;
     display: flex;
@@ -133,7 +136,7 @@ form{
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
 }
 
-.textarea{
+.textarea {
     /* margin-top: 10px; */
     width: 92%;
     height: 15px;
@@ -152,21 +155,17 @@ form{
     color: white;
 }
 
-.below-search{
+.below-search {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     width: 100%;
     /* margin-bottom: 5px; */
 }
 
-.chat-bots-buttons{
-    margin-left: 15px;
-    display: flex;
-    gap: 10px
-}
 
-img{
+
+img {
     height: 30px;
     width: 30px;
     border-radius: 10px;
@@ -174,7 +173,7 @@ img{
 }
 
 .button-container {
-    margin-bottom:5px;
+    margin-bottom: 5px;
     margin-right: 10px;
 }
 
@@ -182,7 +181,8 @@ img{
 .btn {
     position: relative;
     width: auto;
-    background-color: #1a1b2f; /* Button background */
+    background-color: #1a1b2f;
+    /* Button background */
     color: grey;
     border: none;
     border-radius: 15px;
@@ -194,13 +194,14 @@ img{
 }
 
 .btn:hover {
-    background-color: #2a2b3f; /* Slightly lighter on hover */
+    background-color: #2a2b3f;
+    /* Slightly lighter on hover */
     color: white;
 }
 
 
 /* conversation field--> */
-.convo{
+.convo {
     display: flex;
     width: 90%;
     flex-direction: column;
@@ -214,11 +215,15 @@ img{
     scrollbar-width: none;
     /* max-height: calc(100vh-140px-100px); */
 
-    position: absolute;  /* Keeps it positioned relative to viewport */
-    top: 85px;  /* Adjust based on your navbar height */
-    bottom: 140px; /* Prevents it from overlapping formContainer */
-    left: 50%; 
-    transform: translateX(-50%); /* Centers it horizontally */
+    position: absolute;
+    /* Keeps it positioned relative to viewport */
+    top: 85px;
+    /* Adjust based on your navbar height */
+    bottom: 140px;
+    /* Prevents it from overlapping formContainer */
+    left: 50%;
+    transform: translateX(-50%);
+    /* Centers it horizontally */
     max-height: calc(100vh - 220px);
 }
 
@@ -245,7 +250,7 @@ img{
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
 }
 
-.response-nav{
+.response-nav {
     height: 35px;
     background-color: black;
     width: 100%;
@@ -259,36 +264,37 @@ img{
     padding: 8px;
 }
 
-.response-content{
+.response-content {
     flex-grow: 1;
     color: #e0e0e0;
     overflow-y: scroll;
     scroll-behavior: smooth;
     padding: 20px;
-    max-height: 495px; /* Adjust based on your layout */
+    max-height: 495px;
+    /* Adjust based on your layout */
 }
 
 .response-content::-webkit-scrollbar {
     width: 6px;
-  }
-  
+}
+
 .response-content::-webkit-scrollbar-track {
     background-color: transparent;
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 10px;
 }
-  
+
 .response-content::-webkit-scrollbar-thumb {
-    background-color: 	#444c66;
+    background-color: #444c66;
     border-radius: 10px;
 }
-  
+
 .response-content::-webkit-scrollbar-thumb:hover {
     background-color: #5c6688;
-}  
+}
 
-.whole-res-container{
+.whole-res-container {
     display: flex;
     gap: 1rem;
     margin-top: 8px;
@@ -296,13 +302,13 @@ img{
     justify-content: space-evenly;
 }
 
-.error-div{
+.error-div {
     background-color: rgba(255, 0, 0, 0.288);
     border: 2px solid rgba(255, 0, 0, 0.582);
     display: block;
 }
 
-.error-div i{
+.error-div i {
     margin-right: 5px;
 }
 
@@ -310,17 +316,21 @@ img{
 .query-container {
     display: flex;
     padding-right: 10%;
-    align-self: flex-end; /* Align to the right side of the screen */
+    align-self: flex-end;
+    /* Align to the right side of the screen */
     /* max-width: 45%; */
     max-width: 80%;
     width: fit-content;
     margin: 0;
     padding: 10px;
-    background-color: #2d3272; /* Background for each response */
+    background-color: #2d3272;
+    /* Background for each response */
     color: #ffffff;
     border-radius: 10px;
-    line-height: 1.5; /*Increase line height for readability*/
-    word-wrap: break-word; /* Ensure long words break to the next line */
+    line-height: 1.5;
+    /*Increase line height for readability*/
+    word-wrap: break-word;
+    /* Ensure long words break to the next line */
 }
 
 
@@ -328,7 +338,7 @@ img{
 /* media queries --> */
 
 @media screen and (max-width: 600px) {
-    .header{
+    .header {
         padding: 5px;
     }
 
@@ -336,20 +346,22 @@ img{
         margin: 5px 0;
     }
 
-    .nav-links li i{
+    .nav-links li i {
         display: block;
     }
 
-    .nav-links li p{
+    .nav-links li p {
         display: none;
     }
 
     .convo {
-        width: 90%; /* Reduce width for better mobile view */
+        width: 90%;
+        /* Reduce width for better mobile view */
     }
 
     .bottom-textbox {
-        width: 90%; /* Reduce input field width */
+        width: 90%;
+        /* Reduce input field width */
         gap: 5px;
     }
 
@@ -366,14 +378,16 @@ img{
 
     .query-container,
     .response-container {
-        width: 90%; /* Allow more space for messages */
+        width: 90%;
+        /* Allow more space for messages */
         font-size: 14px;
     }
 }
 
 @media screen and (max-width: 1024px) {
     .convo {
-        width: 90%; /* Adjust chat width */
+        width: 90%;
+        /* Adjust chat width */
     }
 
     .bottom-textbox {
@@ -389,10 +403,12 @@ img{
     }
 
     .response-container {
-        width: 90%; /* Allow more space for messages */
+        width: 90%;
+        /* Allow more space for messages */
         font-size: 14px;
     }
-    .whole-res-container{
+
+    .whole-res-container {
         flex-direction: column;
     }
 }
@@ -410,8 +426,10 @@ img{
 
 .history-tab-div {
     overflow-y: auto;
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
-    scroll-behavior: smooth; /* Smooth scrolling */
+    scrollbar-width: none;
+    /* Hide scrollbar for Firefox */
+    scroll-behavior: smooth;
+    /* Smooth scrolling */
     position: absolute;
     width: 250px;
     left: -300px;
@@ -422,21 +440,22 @@ img{
     padding: 10px;
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
     z-index: 1000;
-    transition: left 0.4s ease; 
+    transition: left 0.4s ease;
 }
 
 .history-tab-div.visible {
-    left: 0; /* Slide into view */
+    left: 0;
+    /* Slide into view */
 }
 
-.history-tab-div nav{
+.history-tab-div nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 2px solid black;
 }
 
-.history-tab-div nav button{
+.history-tab-div nav button {
     background-color: #1a1b2f;
     color: white;
     font-size: 1.2rem;
@@ -445,14 +464,14 @@ img{
     margin-top: 4px;
 }
 
-.new-chat{
+.new-chat {
     text-decoration: none;
     color: inherit;
     font-size: 1.2rem;
     margin-right: 5px;
 }
 
-.sidebar-content-div{
+.sidebar-content-div {
     margin-top: 10px;
     width: 100%;
     border-radius: 5px;
@@ -461,64 +480,67 @@ img{
     /* justify-content: center; */
     text-indent: 10px;
     align-items: center;
-    flex-direction: column; /* Stack children vertically */
-    gap: 8px; /* Optional: space between chats */
+    flex-direction: column;
+    /* Stack children vertically */
+    gap: 8px;
+    /* Optional: space between chats */
 }
 
 
 .sidebar-chat-entry {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 12px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .chat-title-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .delete-chat-icon {
-  opacity: 0;
-  color: #888;
-  font-size: 0.85rem;
-  padding: 4px;
-  margin-left: 8px;
-  transition: opacity 0.2s ease, color 0.2s ease;
+    opacity: 0;
+    color: #888;
+    font-size: 0.85rem;
+    padding: 4px;
+    margin-left: 8px;
+    transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .sidebar-chat-entry:hover .delete-chat-icon {
-  opacity: 1;
+    opacity: 1;
 }
 
 .delete-chat-icon:hover {
-  color: #ff5555;
+    color: #ff5555;
 }
 
 .sidebar-chat-entry.active-chat {
-  background: #23244a !important; /* Bluish highlight */
-  color: #fff !important;
-  font-weight: bold;
-  border-radius: 6px;
+    background: #23244a !important;
+    /* Bluish highlight */
+    color: #fff !important;
+    font-weight: bold;
+    border-radius: 6px;
 }
 
 /* Remove default focus/active/hover styles */
 .sidebar-chat-entry:focus,
 .sidebar-chat-entry:active,
 .sidebar-chat-entry:hover {
-  background: none;
-  color: #dedddd;
-  outline: none;
+    background: none;
+    color: #dedddd;
+    outline: none;
 }
 
 
 
-.main-profile-tab{
+.main-profile-tab {
     width: 250px;
     height: 300px;
     background-color: #1a1b2f;
@@ -536,7 +558,7 @@ img{
     flex-grow: 0;
 }
 
-.prof-dp{
+.prof-dp {
     height: 100px;
     width: 100px;
     display: flex;
@@ -547,7 +569,7 @@ img{
     background-color: grey;
 }
 
-.logger{
+.logger {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -555,7 +577,7 @@ img{
     margin-bottom: 20px;
 }
 
-.logger a{
+.logger a {
     height: 30px;
     width: 30%;
     background-color: #080A10;
@@ -567,18 +589,18 @@ img{
     color: white;
 }
 
-.logger a div{
+.logger a div {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.prof-U-name{
+.prof-U-name {
     color: white;
     font-size: 1.3rem;
 }
 
-.wave-user{
+.wave-user {
     font-size: 1.4rem;
     font-weight: 600;
     color: white;
@@ -591,8 +613,7 @@ img{
     top: 0;
 }
 
-.logOut{
+.logOut {
     color: white;
     font-size: 1.2rem;
 }
-
