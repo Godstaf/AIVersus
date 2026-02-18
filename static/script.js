@@ -152,106 +152,212 @@ async function main() {
     deepseekBtn = true; // Initialize DeepSeekBtn to true
     geminiBtn = true; // Initialize geminiBtn to true
     try {
-      const response = await fetch(`/get_chat_history?chat_id=${chat_id}`);
-      const result = await response.json();
+      const resp = await fetch(`/get_chat_history?chat_id=${chat_id}`);
+      const result = await resp.json();
 
       // Check if the response is successful
-      if (response.status === 200) {
+      if (resp.status === 200) {
         const convoDiv = document.querySelector(".convo");
         convoDiv.innerHTML = ""; // Clear existing chat
 
         // Display queries and responses
-        const queries = result.queries || []; // Default to empty array if not present
-        const response = result.response || []; // Default to empty array if not present
-        const response2 = result.response2 || [];
-        const response3 = result.response3 || [];
+        const queries = result.queries || [];
+        const responses = result.response || [];
+        const responses2 = result.response2 || [];
+        const responses3 = result.response3 || [];
         for (let i = 0; i < queries.length; i++) {
-          const queryDiv = document.createElement("div");
-          queryDiv.className = "query-container";
-          queryDiv.innerText = queries[i];
-          convoDiv.appendChild(queryDiv);
+          const queryText = queries[i] || "";
+          const isDebate = queryText.startsWith("[DEBATE]");
 
-          // const responseDiv = document.createElement("div");
-          // responseDiv.className = "response-container";
-          // responseDiv.innerText = response[i] || "No response"; // Default to "No response" if not present
-          // convoDiv.appendChild(responseDiv); // Append the response div after the query div
+          // === DEBATE ENTRY ===
+          if (isDebate) {
+            const topicText = queryText.replace("[DEBATE] ", "").replace("[DEBATE]", "");
 
-          // const responseDiv2 = document.createElement("div");
-          // responseDiv2.className = "response-container";
-          // responseDiv2.innerText = response2[i];
-          // convoDiv.appendChild(responseDiv2);
+            // Query div styled like live debate
+            const queryDiv = document.createElement("div");
+            queryDiv.className = "query-container";
+            queryDiv.innerHTML = `<strong>Debate Topic:</strong> ${topicText}`;
+            convoDiv.appendChild(queryDiv);
 
+            // Parse balanced text and verdict from response3
+            let balancedText = responses3[i] || "";
+            let verdict = null;
 
-          // const responseDiv3 = document.createElement("div");
-          // responseDiv3.className = "response-container";  
-          // responseDiv3.innerText = response3[i];
-          // convoDiv.appendChild(responseDiv3);
+            if (balancedText.includes("|||VERDICT|||")) {
+              const parts = balancedText.split("|||VERDICT|||");
+              balancedText = parts[0];
+              try { verdict = JSON.parse(parts[1]); } catch (e) { console.error("Verdict parse error:", e); }
+            } else if (balancedText.includes("--- JUDGE VERDICT ---")) {
+              // Backward compat: strip old plain-text verdict (can't recover structured data)
+              balancedText = balancedText.split("--- JUDGE VERDICT ---")[0].trim();
+            }
 
-          const wholeResponseContainer = document.createElement("div");
-          wholeResponseContainer.className = "whole-res-container";
+            // Round container
+            const roundContainer = document.createElement("div");
+            roundContainer.className = "debate-round";
 
-          // Add the response in .convo div
-          if (response[i]) {
-            const newDiv = document.createElement("div");
-            newDiv.className = "response-container";
+            // Round header
+            const roundHeader = document.createElement("div");
+            roundHeader.className = "round-header";
+            roundHeader.innerHTML = `<h3>Round 1</h3>`;
+            roundHeader.style.cssText = "background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 10px 15px; border-radius: 8px 8px 0 0; margin-top: 20px;";
+            roundContainer.appendChild(roundHeader);
 
-            const responseNav = document.createElement("nav");
-            responseNav.className = "response-nav";
-            responseNav.innerText = "Chat-Gpt"
-            newDiv.appendChild(responseNav);
+            const wholeResponseContainer = document.createElement("div");
+            wholeResponseContainer.className = "whole-res-container";
 
-            const responseContent = document.createElement("div");
-            responseContent.className = "response-content";
-            responseContent.innerText = response[i];
-            // console.log(response[i]);
-            newDiv.appendChild(responseContent);
+            // FOR Agent (Green)
+            if (responses[i]) {
+              const forDiv = document.createElement("div");
+              forDiv.className = "response-container for-agent";
+              forDiv.innerHTML = `
+                <nav class="response-nav" style="background: linear-gradient(135deg, #11998e, #38ef7d);">🟢 FOR</nav>
+                <div class="response-content">${responses[i]}</div>
+              `;
+              wholeResponseContainer.appendChild(forDiv);
+            }
 
+            // AGAINST Agent (Red)
+            if (responses2[i]) {
+              const againstDiv = document.createElement("div");
+              againstDiv.className = "response-container against-agent";
+              againstDiv.innerHTML = `
+                <nav class="response-nav" style="background: linear-gradient(135deg, #eb3349, #f45c43);">🔴 AGAINST</nav>
+                <div class="response-content">${responses2[i]}</div>
+              `;
+              wholeResponseContainer.appendChild(againstDiv);
+            }
 
-            wholeResponseContainer.appendChild(newDiv);
+            // BALANCED Agent (Yellow/Gold)
+            if (balancedText) {
+              const balancedDiv = document.createElement("div");
+              balancedDiv.className = "response-container balanced-agent";
+              balancedDiv.innerHTML = `
+                <nav class="response-nav" style="background: linear-gradient(135deg, #f7971e, #ffd200);">🟡 BALANCED</nav>
+                <div class="response-content">${balancedText}</div>
+              `;
+              wholeResponseContainer.appendChild(balancedDiv);
+            }
+
+            roundContainer.appendChild(wholeResponseContainer);
+            convoDiv.appendChild(roundContainer);
+
+            // Render Judge Verdict (same as live debate)
+            if (verdict) {
+              const verdictContainer = document.createElement("div");
+              verdictContainer.className = "judge-verdict";
+              verdictContainer.style.cssText = "margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; border: 2px solid gold; color: white;";
+
+              const winnerEmoji = verdict.winner === "FOR" ? "🟢" : verdict.winner === "AGAINST" ? "🔴" : verdict.winner === "BALANCED" ? "🟡" : "🤝";
+
+              let scoresHTML = "";
+              if (verdict.scores) {
+                const scores = verdict.scores;
+                scoresHTML = `
+                  <div style="display: flex; justify-content: space-around; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
+                    <div style="text-align: center; padding: 10px; background: rgba(17,153,142,0.2); border-radius: 8px; min-width: 100px;">
+                      <div style="color: #38ef7d;">🟢 FOR</div>
+                      <div style="font-size: 24px; font-weight: bold; color: white;">${scores.for?.total || '?'}/30</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: rgba(235,51,73,0.2); border-radius: 8px; min-width: 100px;">
+                      <div style="color: #f45c43;">🔴 AGAINST</div>
+                      <div style="font-size: 24px; font-weight: bold; color: white;">${scores.against?.total || '?'}/30</div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; background: rgba(247,151,30,0.2); border-radius: 8px; min-width: 100px;">
+                      <div style="color: #ffd200;">🟡 BALANCED</div>
+                      <div style="font-size: 24px; font-weight: bold; color: white;">${scores.balanced?.total || '?'}/30</div>
+                    </div>
+                  </div>
+                `;
+              }
+
+              let remarksHTML = "";
+              if (verdict.remarks) {
+                remarksHTML = `
+                  <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                    <strong style="color: white;">📝 Judge's Remarks:</strong><br>
+                    <div style="color: #38ef7d; margin-top: 8px;">FOR: ${verdict.remarks.for || 'No remarks'}</div>
+                    <div style="color: #f45c43; margin-top: 8px;">AGAINST: ${verdict.remarks.against || 'No remarks'}</div>
+                    <div style="color: #ffd200; margin-top: 8px;">BALANCED: ${verdict.remarks.balanced || 'No remarks'}</div>
+                  </div>
+                `;
+              }
+
+              verdictContainer.innerHTML = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                  <span style="font-size: 28px;">⚖️</span>
+                  <h2 style="color: gold; margin: 5px 0;">JUDGE'S VERDICT</h2>
+                </div>
+                <div style="text-align: center; font-size: 32px; margin: 15px 0; color: white;">
+                  ${winnerEmoji} <span style="color: gold; font-weight: bold;">${verdict.winner}</span> WINS!
+                </div>
+                ${scoresHTML}
+                <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; color: #e0e0e0;">
+                  <strong style="color: white;">💬 Reasoning:</strong> ${verdict.reasoning || 'No reasoning provided.'}
+                </div>
+                ${remarksHTML}
+              `;
+
+              convoDiv.appendChild(verdictContainer);
+            }
+
+            // === NORMAL (non-debate) ENTRY ===
+          } else {
+            const queryDiv = document.createElement("div");
+            queryDiv.className = "query-container";
+            queryDiv.innerText = queryText;
+            convoDiv.appendChild(queryDiv);
+
+            const wholeResponseContainer = document.createElement("div");
+            wholeResponseContainer.className = "whole-res-container";
+
+            // Chat-Gpt response
+            if (responses[i]) {
+              const newDiv = document.createElement("div");
+              newDiv.className = "response-container";
+              const responseNav = document.createElement("nav");
+              responseNav.className = "response-nav";
+              responseNav.innerText = "Chat-Gpt"
+              newDiv.appendChild(responseNav);
+              const responseContent = document.createElement("div");
+              responseContent.className = "response-content";
+              responseContent.innerText = responses[i];
+              newDiv.appendChild(responseContent);
+              wholeResponseContainer.appendChild(newDiv);
+            }
+
+            // DeepSeek response
+            if (responses2[i]) {
+              const newDiv2 = document.createElement("div");
+              newDiv2.className = "response-container";
+              const responseNav2 = document.createElement("nav");
+              responseNav2.className = "response-nav";
+              responseNav2.innerText = "DeepSeek";
+              newDiv2.appendChild(responseNav2);
+              const responseContent2 = document.createElement("div");
+              responseContent2.className = "response-content";
+              responseContent2.innerText = responses2[i];
+              newDiv2.appendChild(responseContent2);
+              wholeResponseContainer.appendChild(newDiv2);
+            }
+
+            // Gemini response
+            if (responses3[i]) {
+              const newDiv3 = document.createElement("div");
+              newDiv3.className = "response-container";
+              const responseNav3 = document.createElement("nav");
+              responseNav3.className = "response-nav";
+              responseNav3.innerText = "Gemini";
+              newDiv3.appendChild(responseNav3);
+              const responseContent3 = document.createElement("div");
+              responseContent3.className = "response-content";
+              responseContent3.innerText = responses3[i];
+              newDiv3.appendChild(responseContent3);
+              wholeResponseContainer.appendChild(newDiv3);
+            }
+
+            convoDiv.appendChild(wholeResponseContainer);
           }
-
-
-          // Add the second response
-          if (response2[i]) {
-            const newDiv2 = document.createElement("div");
-            newDiv2.className = "response-container";
-            const responseNav2 = document.createElement("nav");
-            responseNav2.className = "response-nav";
-            responseNav2.innerText = "DeepSeek";
-            newDiv2.appendChild(responseNav2);
-
-            const responseContent2 = document.createElement("div");
-            responseContent2.className = "response-content";
-            responseContent2.innerText = response2[i];
-            // console.log(response2[i]);
-            newDiv2.appendChild(responseContent2);
-
-            wholeResponseContainer.appendChild(newDiv2);
-          }
-
-
-          // Add the third response
-          if (response3[i]) {
-            const newDiv3 = document.createElement("div");
-            newDiv3.className = "response-container";
-            const responseNav3 = document.createElement("nav");
-            responseNav3.className = "response-nav";
-            responseNav3.innerText = "Gemini";
-            newDiv3.appendChild(responseNav3);
-
-            const responseContent3 = document.createElement("div");
-            responseContent3.className = "response-content";
-            responseContent3.innerText = response3[i];
-            // console.log(response3[i]);
-            newDiv3.appendChild(responseContent3);
-
-            wholeResponseContainer.appendChild(newDiv3);
-          }
-
-          convoDiv.appendChild(wholeResponseContainer); // Append the new div to .convo
-
-
-
         }
       } else {
         console.error("Error loading chat history:", result.message);
@@ -633,7 +739,7 @@ async function main() {
         if (verdict) {
           const verdictContainer = document.createElement("div");
           verdictContainer.className = "judge-verdict";
-          verdictContainer.style.cssText = "margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; border: 2px solid gold;";
+          verdictContainer.style.cssText = "margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; border: 2px solid gold; color: white;";
 
           // Winner banner
           const winnerEmoji = verdict.winner === "FOR" ? "🟢" : verdict.winner === "AGAINST" ? "🔴" : verdict.winner === "BALANCED" ? "🟡" : "🤝";
@@ -645,15 +751,15 @@ async function main() {
               <div style="display: flex; justify-content: space-around; margin: 15px 0; flex-wrap: wrap; gap: 10px;">
                 <div style="text-align: center; padding: 10px; background: rgba(17,153,142,0.2); border-radius: 8px; min-width: 100px;">
                   <div style="color: #38ef7d;">🟢 FOR</div>
-                  <div style="font-size: 24px; font-weight: bold;">${scores.for?.total || '?'}/30</div>
+                  <div style="font-size: 24px; font-weight: bold; color: white;">${scores.for?.total || '?'}/30</div>
                 </div>
                 <div style="text-align: center; padding: 10px; background: rgba(235,51,73,0.2); border-radius: 8px; min-width: 100px;">
                   <div style="color: #f45c43;">🔴 AGAINST</div>
-                  <div style="font-size: 24px; font-weight: bold;">${scores.against?.total || '?'}/30</div>
+                  <div style="font-size: 24px; font-weight: bold; color: white;">${scores.against?.total || '?'}/30</div>
                 </div>
                 <div style="text-align: center; padding: 10px; background: rgba(247,151,30,0.2); border-radius: 8px; min-width: 100px;">
                   <div style="color: #ffd200;">🟡 BALANCED</div>
-                  <div style="font-size: 24px; font-weight: bold;">${scores.balanced?.total || '?'}/30</div>
+                  <div style="font-size: 24px; font-weight: bold; color: white;">${scores.balanced?.total || '?'}/30</div>
                 </div>
               </div>
             `;
@@ -663,7 +769,7 @@ async function main() {
           if (verdict.remarks) {
             remarksHTML = `
               <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <strong>📝 Judge's Remarks:</strong><br>
+                <strong style="color: white;">📝 Judge's Remarks:</strong><br>
                 <div style="color: #38ef7d; margin-top: 8px;">FOR: ${verdict.remarks.for || 'No remarks'}</div>
                 <div style="color: #f45c43; margin-top: 8px;">AGAINST: ${verdict.remarks.against || 'No remarks'}</div>
                 <div style="color: #ffd200; margin-top: 8px;">BALANCED: ${verdict.remarks.balanced || 'No remarks'}</div>
@@ -676,12 +782,12 @@ async function main() {
               <span style="font-size: 28px;">⚖️</span>
               <h2 style="color: gold; margin: 5px 0;">JUDGE'S VERDICT</h2>
             </div>
-            <div style="text-align: center; font-size: 32px; margin: 15px 0;">
+            <div style="text-align: center; font-size: 32px; margin: 15px 0; color: white;">
               ${winnerEmoji} <span style="color: gold; font-weight: bold;">${verdict.winner}</span> WINS!
             </div>
             ${scoresHTML}
-            <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-              <strong>💬 Reasoning:</strong> ${verdict.reasoning || 'No reasoning provided.'}
+            <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; color: #e0e0e0;">
+              <strong style="color: white;">💬 Reasoning:</strong> ${verdict.reasoning || 'No reasoning provided.'}
             </div>
             ${remarksHTML}
           `;

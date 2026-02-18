@@ -1,17 +1,20 @@
 import psycopg2 as ps
 from datetime import datetime
 import uuid
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-# Connect to MySQL database
-pwrd = "krish113838G"
+# Connect to PostgreSQL database
+pwrd = os.getenv("DB_PASSWORD")
 
 try:
     mycon = ps.connect(
-        host='localhost',
-        user='postgres',
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "postgres"),
         password=pwrd,
-        dbname = 'aiversus'
+        dbname=os.getenv("DB_NAME", "aiversus")
     )
     print("Connected")
 

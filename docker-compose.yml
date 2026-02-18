@@ -1,0 +1,39 @@
+services:
+  # ---- PostgreSQL Database ----
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: aiversus
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Auto-creates tables on first run
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d aiversus" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---- Flask Application ----
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db # Points to the PostgreSQL container
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_USER: postgres
+      DB_NAME: aiversus
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

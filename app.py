@@ -27,10 +27,10 @@ pwrd = os.getenv("DB_PASSWORD")
 
 try:
     mycon = ps.connect(
-        host='localhost',
-        user='postgres',
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "postgres"),
         password=pwrd,
-        dbname = 'aiversus'
+        dbname=os.getenv("DB_NAME", "aiversus")
     )
     print("Connected")
 except ps.Error as e:
@@ -542,9 +542,10 @@ def debate():
         against_response = debate_history[0].get("against", "") if debate_history else ""
         balanced_response = debate_history[0].get("balanced", "") if debate_history else ""
         
-        # Add verdict info to balanced response
-        verdict_summary = f"\n\n--- JUDGE VERDICT ---\nWinner: {verdict.get('winner', 'TIE')}\nReasoning: {verdict.get('reasoning', 'N/A')}"
-        balanced_response += verdict_summary
+        # Add verdict info to balanced response as structured JSON
+        import json as json_lib
+        verdict_json = json_lib.dumps(verdict)
+        balanced_response += "|||VERDICT|||" + verdict_json
         
         if chat_id:
             # Update existing chat
