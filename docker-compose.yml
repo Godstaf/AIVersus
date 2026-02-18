@@ -1,3 +1,13 @@
+# ============================================
+# AIVersus - Docker Compose
+# ============================================
+# Just run:  docker compose up --build
+#
+# To set your Gemini API key, either:
+#   1. Create a .env file:  echo "GEMINI_API_KEY=your_key" > .env
+#   2. Or pass it inline:   GEMINI_API_KEY=your_key docker compose up --build
+# ============================================
+
 services:
   # ---- PostgreSQL Database ----
   db:
@@ -5,13 +15,13 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: aiversus_db_pass
       POSTGRES_DB: aiversus
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Auto-creates tables on first run
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d aiversus" ]
       interval: 5s
@@ -24,13 +34,15 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
-    env_file:
-      - .env
     environment:
-      DB_HOST: db # Points to the PostgreSQL container
-      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      # Database config (points to the 'db' container above)
+      DB_HOST: db
       DB_USER: postgres
+      DB_PASSWORD: aiversus_db_pass
       DB_NAME: aiversus
+      # API Key — override via .env file or CLI:
+      #   GEMINI_API_KEY=xxx docker compose up
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy
