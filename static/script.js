@@ -1,8 +1,5 @@
 var u_email = null;
 var u_name = null;
-var chatgptBtn = true; // Initialize chatgptBtn to true
-var deepseekBtn = true; // Initialize DeepSeekBtn to true
-var geminiBtn = true; // Initialize geminiBtn to true
 var currentChatId = null; // Track current chat ID (was in server session)
 
 // ── JWT Token Helpers ──────────────────────────────────────────
@@ -388,9 +385,6 @@ async function main() {
 
   // Create a new chat and highlight it
   async function createNewChat() {
-    chatgptBtn = true; // Initialize chatgptBtn to true
-    deepseekBtn = true; // Initialize DeepSeekBtn to true
-    geminiBtn = true; // Initialize geminiBtn to true
     try {
       const response = await fetch("/new_chat", {
         method: "POST",
@@ -562,79 +556,7 @@ async function main() {
   }
 
 
-  document.querySelector(".chatgpt-btn").addEventListener("click", async () => {
-    // Handle ChatGPT button click
-    if (chatgptBtn === true && deepseekBtn === false && geminiBtn === false) {
-      alert("Choose at least one AI model to query.");
-    }
-    else {
-      chatgptBtn = !chatgptBtn;
-      if (chatgptBtn === false) {
-        document.querySelector(".chatgpt-logo").style.filter = "grayscale(50%) brightness(0.5)";
-        // console.log('ChatGPT button is now disabled');
 
-      }
-      else {
-        document.querySelector(".chatgpt-logo").style.filter = "grayscale(0%) brightness(1)";
-        // console.log('ChatGPT button is now enabled');
-      }
-      console.log("ChatGPT button toggled:", chatgptBtn);
-      await fetch('/chatgpt-btn', {
-        method: 'POST',
-        headers: getAuthHeaders('application/json'),
-        body: JSON.stringify({ chatgptBtn: chatgptBtn })
-      });
-    }
-  });
-
-
-  document.querySelector(".deepseek-btn").addEventListener("click", async () => {
-    // Handle DeepSeek button click
-    if (deepseekBtn === true && chatgptBtn === false && geminiBtn === false) {
-      alert("Choose at least one AI model to query.");
-    }
-    else {
-      deepseekBtn = !deepseekBtn;
-      if (deepseekBtn === false) {
-        document.querySelector(".deepseek-logo").style.filter = "grayscale(50%) brightness(0.5)";
-        // console.log('DeepSeek button is now disabled');
-      }
-      else {
-        document.querySelector(".deepseek-logo").style.filter = "grayscale(0%) brightness(1)";
-        // console.log('DeepSeek button is now enabled');
-      }
-      console.log("DeepSeek button toggled:", deepseekBtn);
-      await fetch('/deepseek-btn', {
-        method: 'POST',
-        headers: getAuthHeaders('application/json'),
-        body: JSON.stringify({ deepseekBtn: deepseekBtn })
-      });
-    }
-  });
-
-
-  document.querySelector(".gemini-btn").addEventListener("click", async () => {
-    // Handle Gemini button click
-    if (geminiBtn === true && chatgptBtn === false && deepseekBtn === false) {
-      alert("Choose at least one AI model to query.");
-    }
-    else {
-      geminiBtn = !geminiBtn;
-      if (geminiBtn === false) {
-        document.querySelector(".gemini-logo").style.filter = "grayscale(50%) brightness(0.5)";
-        // console.log('Gemini button is now disabled');
-      }
-      else {
-        document.querySelector(".gemini-logo").style.filter = "grayscale(0%) brightness(1)";
-      }
-      console.log("Gemini button toggled:", geminiBtn);
-      await fetch('/gemini-btn', {
-        method: 'POST',
-        headers: getAuthHeaders('application/json'),
-        body: JSON.stringify({ geminiBtn: geminiBtn })
-      });
-    }
-  });
 
 
 
@@ -654,13 +576,10 @@ async function main() {
     const queryUrl = this.getAttribute("data-query-url");
     document.getElementById("qry").value = "";
 
-    // Add chat_id and toggle states to form data (moved from server session)
+    // Add chat_id to form data
     if (currentChatId) {
       formData.append("chat_id", currentChatId);
     }
-    formData.append("chatgpt_tgl", chatgptBtn ? "True" : "False");
-    formData.append("deepseek_tgl", deepseekBtn ? "True" : "False");
-    formData.append("gemini_tgl", geminiBtn ? "True" : "False");
 
     const sendBtn = document.querySelector(".btn-search");
     sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';

@@ -148,57 +148,7 @@ def login_page():
 
 
 
-@app.route("/chatgpt-btn", methods=["POST"])
-def chatgpt_btn():
-    data= request.get_json()
-    chatgpt_btn = str(data.get('chatgptBtn', True))
-    try:
-        # Ensure chatgpt_btn is a boolean
-        print("Received chatgpt_btn:", type(chatgpt_btn))
-        if chatgpt_btn not in ["True", "False"]:
-            return jsonify({"status": "error", "message": "Invalid button state"}), 400
-        
-        # Store the button state in the session
-        session["chatgpt_tgl"] = chatgpt_btn
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    return jsonify({"status": "success", "message": "ChatGPT button state updated"}), 200
 
-
-
-@app.route("/deepseek-btn", methods=["POST"])
-def deepseek_btn():
-    data= request.get_json()
-    deepseek_btn = str(data.get('deepseekBtn', True))
-    try:
-        # Ensure deepseek_btn is a boolean
-        print("Received deepseek_btn:", type(deepseek_btn))
-        if deepseek_btn not in ["True", "False"]:
-            return jsonify({"status": "error", "message": "Invalid button state"}), 400
-        
-        # Store the button state in the session
-        session["deepseek_tgl"] = deepseek_btn
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    return jsonify({"status": "success", "message": "DeepSeek button state updated"}), 200
-
-
-
-@app.route("/gemini-btn", methods=["POST"])
-def gemini_btn():
-    data= request.get_json()
-    gemini_btn = str(data.get('geminiBtn', True))
-    try:
-        # Ensure gemini_btn is a boolean
-        print("Received gemini_btn:", type(gemini_btn))
-        if gemini_btn not in ["True", "False"]:
-            return jsonify({"status": "error", "message": "Invalid button state"}), 400
-        
-        # Store the button state in the session
-        session["gemini_tgl"] = gemini_btn
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    return jsonify({"status": "success", "message": "Gemini button state updated"}), 200
 
 
 
