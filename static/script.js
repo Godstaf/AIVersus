@@ -3,20 +3,38 @@ var u_name = null;
 var chatgptBtn = true; // Initialize chatgptBtn to true
 var deepseekBtn = true; // Initialize DeepSeekBtn to true
 var geminiBtn = true; // Initialize geminiBtn to true
+var currentChatId = null; // Track current chat ID (was in server session)
+
+// ── JWT Token Helpers ──────────────────────────────────────────
+function getToken() {
+  return localStorage.getItem("access_token");
+}
+
+function getAuthHeaders(contentType = null) {
+  const headers = {};
+  const token = getToken();
+  if (token) {
+    headers["Authorization"] = "Bearer " + token;
+  }
+  if (contentType) {
+    headers["Content-Type"] = contentType;
+  }
+  return headers;
+}
 
 async function fetchUserEmail() {
 
   try {
-    const response = await fetch("/get_user");
+    const response = await fetch("/get_user", {
+      headers: getAuthHeaders()
+    });
     const result = await response.json();
 
     if (response.status === 200) {
-      // console.log("Logged-in user email:", result.email);
       u_email = result.email;
       u_name = result.name;
 
     } else {
-      // console.log("No user is logged in.");
       u_email = null;
       u_name = null;
     }
@@ -31,9 +49,7 @@ async function deleteEmptyChats() {
   try {
     const response = await fetch("/delete_empty_chats", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      }
+      headers: getAuthHeaders("application/json")
     });
 
     if (response.status === 200) {
@@ -56,7 +72,9 @@ async function main() {
     sidebarContent.innerHTML = "";
 
 
-    const response = await fetch("/get_all_chats");
+    const response = await fetch("/get_all_chats", {
+      headers: getAuthHeaders()
+    });
     const result = await response.json();
     const chats = result.chats || [];
 
@@ -85,9 +103,7 @@ async function main() {
         try {
           const response = await fetch("/delete_chat", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
+            headers: getAuthHeaders("application/json"),
             body: JSON.stringify({ chat_id: chat.chat_id })
           });
 
@@ -152,7 +168,9 @@ async function main() {
     deepseekBtn = true; // Initialize DeepSeekBtn to true
     geminiBtn = true; // Initialize geminiBtn to true
     try {
-      const resp = await fetch(`/get_chat_history?chat_id=${chat_id}`);
+      const resp = await fetch(`/get_chat_history?chat_id=${chat_id}`, {
+        headers: getAuthHeaders()
+      });
       const result = await resp.json();
 
       // Check if the response is successful
@@ -376,9 +394,7 @@ async function main() {
     try {
       const response = await fetch("/new_chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: getAuthHeaders("application/json"),
         body: JSON.stringify({ email: u_email })
       });
 
@@ -516,7 +532,10 @@ async function main() {
         u_email = null;
         u_name = null;
 
-        // Optionally, clear session data on the server (if applicable)
+        // Clear JWT token from localStorage
+        localStorage.removeItem("access_token");
+
+        // Notify server (optional with JWT, but keeps API clean)
         fetch("/logout", { method: "POST" })
           .then(() => {
             // Reload the page to reflect the logout state
@@ -562,9 +581,7 @@ async function main() {
       console.log("ChatGPT button toggled:", chatgptBtn);
       await fetch('/chatgpt-btn', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders('application/json'),
         body: JSON.stringify({ chatgptBtn: chatgptBtn })
       });
     }
@@ -589,9 +606,7 @@ async function main() {
       console.log("DeepSeek button toggled:", deepseekBtn);
       await fetch('/deepseek-btn', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders('application/json'),
         body: JSON.stringify({ deepseekBtn: deepseekBtn })
       });
     }
@@ -615,9 +630,7 @@ async function main() {
       console.log("Gemini button toggled:", geminiBtn);
       await fetch('/gemini-btn', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders('application/json'),
         body: JSON.stringify({ geminiBtn: geminiBtn })
       });
     }
@@ -641,6 +654,14 @@ async function main() {
     const queryUrl = this.getAttribute("data-query-url");
     document.getElementById("qry").value = "";
 
+    // Add chat_id and toggle states to form data (moved from server session)
+    if (currentChatId) {
+      formData.append("chat_id", currentChatId);
+    }
+    formData.append("chatgpt_tgl", chatgptBtn ? "True" : "False");
+    formData.append("deepseek_tgl", deepseekBtn ? "True" : "False");
+    formData.append("gemini_tgl", geminiBtn ? "True" : "False");
+
     const sendBtn = document.querySelector(".btn-search");
     sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
     sendBtn.disabled = true;
@@ -658,6 +679,7 @@ async function main() {
     try {
       const apiCall = await fetch(queryUrl, {
         method: "POST",
+        headers: getAuthHeaders(),
         body: formData,
       });
       const response = await apiCall.json();
@@ -841,7 +863,9 @@ async function main() {
   document.querySelector(".history-tab-div .new-chat").addEventListener("click", async (event) => {
 
     // check if there already exists an empty chat and if it exists then simply open it
-    const response = await fetch("/get_all_chats");
+    const response = await fetch("/get_all_chats", {
+      headers: getAuthHeaders()
+    });
     const result = await response.json();
     const chats = result.chats || [];
     const emptyChat = chats.find(chat => (chat.queries.length === 0 || !chat.queries[0]));

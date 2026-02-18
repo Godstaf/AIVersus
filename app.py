@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, jsonify, session
 from google import genai
 from openai import OpenAI
 import psycopg2 as ps
-import hashlib
 import os
 import time
+from datetime import timedelta
 from bson import ObjectId
 import postgresExtraFuncs as eFuncs
+from auth import verify_password, get_password_hash, create_access_token, token_required, decode_access_token
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -49,33 +50,27 @@ def index():
 
 
 @app.route("/new_chat", methods=["POST"])
-def new_chat():
-    email = session.get("userEmail")
-    if not email:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401
+@token_required
+def new_chat(current_user_email):
     chat_id = eFuncs.insert_one({
-        "email"    : email,
+        "email"    : current_user_email,
         "queries"  : [],
         "response" : [],
         "response2": [],
         "response3": []
     })
     if chat_id is not None:
-        session["chat_id"] = str(chat_id)
         return jsonify({"status": "success", "message": "New chat created", "chat_id": chat_id}), 200
     else:
-        session["chat_id"] = None
         return jsonify({"status": "error", "message": "Failed to create chat"}), 500
 
 
 
 @app.route("/get_all_chats", methods=["GET"])
-def get_all_chats():
-    email = session.get("userEmail")
-    if not email:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401
-    # Fetch all chat history for the user from MongoDB
-    user_docs = list(eFuncs.findAll(email) or [])  # Convert cursor to list
+@token_required
+def get_all_chats(current_user_email):
+    # Fetch all chat history for the user
+    user_docs = list(eFuncs.findAll(current_user_email) or [])  # Convert cursor to list
     if user_docs:
         return jsonify({
             "status": "success",
@@ -93,22 +88,16 @@ def get_all_chats():
 
 
 @app.route("/get_chat_history", methods=["GET"])
-def get_chat_history():
-    email = session.get("userEmail")
+@token_required
+def get_chat_history(current_user_email):
     chat_id = request.args.get("chat_id")  # Get chat_id from query params
-    if not email:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401
 
-    if chat_id:
-        session["chat_id"] = chat_id  # Set the current chat_id in session
-
-    current_chat_id = session.get("chat_id")
-    if not current_chat_id:
+    if not chat_id:
         return jsonify({"status": "error", "message": "No chat selected"}), 400
 
     try:
         # Fetch the specific chat document directly using its _id and email for security
-        chat_doc = eFuncs.find_one(id = current_chat_id, email = email)
+        chat_doc = eFuncs.find_one(id = chat_id, email = current_user_email)
     except Exception:
         return jsonify({"status": "error", "message": "Invalid chat ID format"}), 400
 
@@ -126,30 +115,23 @@ def get_chat_history():
 
 
 @app.route("/delete_empty_chats", methods=["POST"])
-def delete_empty_chats():
-    email = session.get("userEmail")
-    if not email:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401  
+@token_required
+def delete_empty_chats(current_user_email):
     # Delete all chats for the user that have no queries or response
-    
-    
-    result = eFuncs.delete_many(email)
+    result = eFuncs.delete_many(current_user_email)
     return jsonify({"status": "success", "message": f"{result} empty chats deleted."}), 200
 
 
 @app.route("/delete_chat", methods=["POST"])
-def delete_chat():
-    email = session.get("userEmail")
-    if not email:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401
-    
+@token_required
+def delete_chat(current_user_email):
     data = request.get_json()
     chat_id = data.get("chat_id")
     
     if not chat_id:
         return jsonify({"status": "error", "message": "Chat ID is required"}), 400
     
-    result = eFuncs.delete_one(chat_id, email)
+    result = eFuncs.delete_one(chat_id, current_user_email)
     if result:
         return jsonify({"status": "success", "message": "Chat deleted successfully"}), 200
     else:
@@ -222,11 +204,8 @@ def gemini_btn():
 
 
 
-def get_chat_history_for_prompt():
+def get_chat_history_for_prompt(email=None, chat_id=None):
     """Helper function to get chat history as a string for AI prompts"""
-    email = session.get("userEmail")
-    chat_id = session.get("chat_id")
-    
     if not email or not chat_id:
         return "{}"
     
@@ -499,9 +478,11 @@ Provide your verdict as JSON (no markdown formatting):
 
 
 @app.route("/debate", methods=["POST"])
-def debate():
+@token_required
+def debate(current_user_email):
     """Main debate endpoint - Optimized for rate limits"""
     query = request.form.get("Query", "").strip()
+    chat_id = request.form.get("chat_id")
     
     # Simple validation (no API call) to save rate limit quota
     if not query or len(query) < 5:
@@ -532,39 +513,33 @@ def debate():
     verdict = get_judge_verdict(query, debate_history)
     
     # === SAVE DEBATE TO DATABASE ===
-    email = session.get("userEmail")
-    chat_id = session.get("chat_id")
+    # Format responses for storage
+    import json
+    for_response = debate_history[0].get("for", "") if debate_history else ""
+    against_response = debate_history[0].get("against", "") if debate_history else ""
+    balanced_response = debate_history[0].get("balanced", "") if debate_history else ""
     
-    if email:
-        # Format responses for storage
-        import json
-        for_response = debate_history[0].get("for", "") if debate_history else ""
-        against_response = debate_history[0].get("against", "") if debate_history else ""
-        balanced_response = debate_history[0].get("balanced", "") if debate_history else ""
-        
-        # Add verdict info to balanced response as structured JSON
-        import json as json_lib
-        verdict_json = json_lib.dumps(verdict)
-        balanced_response += "|||VERDICT|||" + verdict_json
-        
-        if chat_id:
-            # Update existing chat
-            eFuncs.update_one(chat_id, email, 
-                qry=f"[DEBATE] {query}", 
-                rep=for_response, 
-                rep2=against_response, 
-                rep3=balanced_response)
-        else:
-            # Create new chat for debate
-            new_chat_id = eFuncs.insert_one({
-                "email": email,
-                "queries": [f"[DEBATE] {query}"],
-                "response": [for_response],
-                "response2": [against_response],
-                "response3": [balanced_response]
-            })
-            if new_chat_id:
-                session["chat_id"] = new_chat_id
+    # Add verdict info to balanced response as structured JSON
+    import json as json_lib
+    verdict_json = json_lib.dumps(verdict)
+    balanced_response += "|||VERDICT|||" + verdict_json
+    
+    if chat_id:
+        # Update existing chat
+        eFuncs.update_one(chat_id, current_user_email, 
+            qry=f"[DEBATE] {query}", 
+            rep=for_response, 
+            rep2=against_response, 
+            rep3=balanced_response)
+    else:
+        # Create new chat for debate
+        new_chat_id = eFuncs.insert_one({
+            "email": current_user_email,
+            "queries": [f"[DEBATE] {query}"],
+            "response": [for_response],
+            "response2": [against_response],
+            "response3": [balanced_response]
+        })
     
     return jsonify({
         "status": "success",
@@ -578,20 +553,19 @@ def debate():
 
 
 @app.route("/query", methods=["POST"])
-def query_page():
+@token_required
+def query_page(current_user_email):
     qry = request.form.get("Query")
-    email = session.get("userEmail")
-    chat_id = session.get("chat_id")  # Get current chat_id from session
-    chatgpt_btn = session.get("chatgpt_tgl")
-    deepseek_btn = session.get("deepseek_tgl")
-    gemini_btn = session.get("gemini_tgl")
-    chatgpt_btn, deepseek_btn, gemini_btn = chatgpt_btn or "True", deepseek_btn or "True", gemini_btn or "True"
+    chat_id = request.form.get("chat_id")
+    chatgpt_btn = request.form.get("chatgpt_tgl", "True")
+    deepseek_btn = request.form.get("deepseek_tgl", "True")
+    gemini_btn = request.form.get("gemini_tgl", "True")
     responseTxt, response2Txt, response3Txt = None, None, None
 
     if (chatgpt_btn == "True"):
         # Using Gemini API for ChatGPT responses (OpenAI key has no model access)
         try:
-            qrygpt = "You are response1 (or just response). Past chat in form of json: " + get_chat_history_for_prompt() + "\n\n Current Query: " + qry
+            qrygpt = "You are response1 (or just response). Past chat in form of json: " + get_chat_history_for_prompt(current_user_email, chat_id) + "\n\n Current Query: " + qry
             
 
             client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -607,7 +581,7 @@ def query_page():
     if (deepseek_btn == "True"):
         time.sleep(2)  # Delay to avoid rate limiting with same API key
         try:
-            qryDp = "You are response2 (or just response). Past chat in form of json: " + get_chat_history_for_prompt() + "\n\n Current Query: " + qry
+            qryDp = "You are response2 (or just response). Past chat in form of json: " + get_chat_history_for_prompt(current_user_email, chat_id) + "\n\n Current Query: " + qry
             client2 = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
             response2 = client2.models.generate_content(
                 model="gemini-3-flash-preview",
@@ -621,7 +595,7 @@ def query_page():
     if (gemini_btn == "True"):
         time.sleep(2)  # Delay to avoid rate limiting with same API key
         try:
-            qryGem = "You are response3 (or just response). Past chat in form of json: " + get_chat_history_for_prompt() + "\n\n Current Query: " + qry
+            qryGem = "You are response3 (or just response). Past chat in form of json: " + get_chat_history_for_prompt(current_user_email, chat_id) + "\n\n Current Query: " + qry
             client3 = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
             response3 = client3.models.generate_content(
                 model="gemini-3-flash-preview",
@@ -632,18 +606,13 @@ def query_page():
             print(f"Gemini Error (Gemini): {e}")
             response3Txt = "⚠️ Rate limit exceeded. Please wait a minute and try again."
     
-    if email is not None and chat_id is not None:
+    if chat_id is not None:
         # Update the correct chat document by _id
-        
-        
-        eFuncs.update_one(id = chat_id, email = email, qry = qry or '', rep = responseTxt or '', rep2 = response2Txt or '', rep3 = response3Txt or '')
-        
-        
-        
-    elif email is not None:
-        # Fallback: create new document if chat_id/session is missing
+        eFuncs.update_one(id = chat_id, email = current_user_email, qry = qry or '', rep = responseTxt or '', rep2 = response2Txt or '', rep3 = response3Txt or '')
+    else:
+        # Fallback: create new document if chat_id is missing
         eFuncs.insert_one({
-            "email": email,
+            "email": current_user_email,
             "queries": [qry],
             "response": [responseTxt],
             "response2": [response2Txt],
@@ -655,9 +624,6 @@ def query_page():
         "response2": response2Txt,
         "response3": response3Txt
     }
-
-    # return {"response": response.results[0].content}
-    # return {"response": qry} 
 
 
 
@@ -676,19 +642,23 @@ def registerit():
     elif not password.isalnum():
         return jsonify({"status": "error", "message": "Password must be alphanumeric"}), 400
 
-    # Hash the password using SHA-256
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    print("Hashed password: ", hashed_password)
+    # Hash the password using bcrypt
+    hashed_password = get_password_hash(password)
 
     # Validate email and name
     if not emailId or not name:
         return jsonify({"status": "error", "message": "Email and Name cannot be empty"}), 400
 
-
-    
     try:
-        # Use parameterized query to insert data
-        query = "INSERT INTO \"user\" (name, email, password) VALUES (%s, %s, %s)"
+        # Use parameterized query to insert data, updating password if user already exists
+        query = """
+            INSERT INTO "user" (name, email, password) 
+            VALUES (%s, %s, %s)
+            ON CONFLICT (email) 
+            DO UPDATE SET 
+                name = EXCLUDED.name, 
+                password = EXCLUDED.password
+        """
         values = (name, emailId, hashed_password)
         cr.execute(query, values)
 
@@ -707,48 +677,61 @@ def registerit():
 
 @app.route("/loginit", methods=["POST"])
 def loginit():
-    # Get form data
+    """Authenticate user and return JWT access token (mirrors FastAPI /token endpoint)"""
     emailId = request.form.get("email")
     password = request.form.get("password")
-    print("password: ", password)
-    if password is None:
-        # Handle the error, e.g., return an error message
+    
+    if not password:
         return jsonify({"status": "error", "message": "Password cannot be empty"}), 401
-    hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    query = "SELECT * FROM \"user\" WHERE email = %s AND password = %s"
-    values = (emailId, hashed_password)
-    cr.execute(query, values)
+    if not emailId:
+        return jsonify({"status": "error", "message": "Email cannot be empty"}), 401
+    
+    # Fetch user from database by email
+    query = "SELECT name, email, password FROM \"user\" WHERE email = %s"
+    cr.execute(query, (emailId,))
     result = cr.fetchone()
-    # fetch name from database
+    
     if result is None:
         return jsonify({"status": "error", "message": "Invalid email or password"}), 401
-    usrName = result[0] 
-    print(result)
-    if result:
-        session["userEmail"] = emailId  # Store email in session
-        session["userName"] = str(usrName).split()[0] if usrName else ""  # Ensure usrName is a string and handle None
-        return jsonify({"status": "success", "message": "Login successful!"}), 200
-    else:
+    
+    usrName, userEmail, stored_hash = result[0], result[1], result[2]
+    
+    # Verify password using bcrypt
+    if not verify_password(password, stored_hash):
         return jsonify({"status": "error", "message": "Invalid email or password"}), 401
+    
+    # Create JWT access token (mirrors FastAPI tutorial's create_access_token)
+    access_token_expires = timedelta(minutes=30)
+    access_token = create_access_token(
+        data={"sub": userEmail, "name": str(usrName).split()[0] if usrName else ""},
+        expires_delta=access_token_expires
+    )
+    
+    return jsonify({
+        "status": "success",
+        "message": "Login successful!",
+        "access_token": access_token,
+        "token_type": "bearer"
+    }), 200
 
 
 
 
 @app.route("/get_user", methods=["GET"])
-def get_user():
-    email = session.get("userEmail")
-    name = session.get("userName")
-    if email:
-        return jsonify({"status": "success", "email": email, "name": name}), 200
-    else:
-        return jsonify({"status": "error", "message": "No user logged in"}), 401
+@token_required
+def get_user(current_user_email):
+    """Return user info from JWT token (mirrors FastAPI /users/me endpoint)"""
+    # Decode name from token payload
+    token = request.headers.get("Authorization", "").split(" ", 1)[1]
+    payload = decode_access_token(token)
+    name = payload.get("name", "")
+    return jsonify({"status": "success", "email": current_user_email, "name": name}), 200
 
 
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    session.pop("userEmail", None)  # Remove email from session
-    session.pop("userName", None)   # Remove name from session
+    """Logout is client-side only with JWT — just return success"""
     return jsonify({"status": "success", "message": "Logged out successfully!"}), 200
 
 

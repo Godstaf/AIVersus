@@ -31,7 +31,7 @@ It's a creative way to explore different perspectives on any debatable topic, po
 | 🗣️ **AI Debates** | Three AI agents (FOR / AGAINST / BALANCED) debate any topic you provide |
 | ⚖️ **AI Judge** | An impartial judge scores each side (out of 30) and picks a winner |
 | 💬 **Chat History** | All debates are saved and can be reloaded with full formatting |
-| 🔐 **User Authentication** | Register/login with email and password |
+| 🔐 **Secure Auth** | JWT-based authentication with bcrypt password hashing |
 | 🎨 **Dark Theme UI** | Sleek dark interface with color-coded debate panels |
 | 🐳 **Docker Ready** | One command to run everything — no local setup needed |
 
@@ -59,10 +59,11 @@ The AI Judge evaluates all three positions and declares a winner:
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | HTML, CSS, JavaScript |
-| **Backend** | Python, Flask |
-| **Database** | PostgreSQL |
-| **AI** | Google Gemini API |
+| **Frontend** | HTML, CSS, JavaScript (JWT in localStorage) |
+| **Backend** | Python, Flask, REST API |
+| **Auth** | JWT (JSON Web Tokens), Bcrypt, Werkzeug Security |
+| **Database** | PostgreSQL (Dockerized) |
+| **AI** | Google Gemini API (Multi-agent orchestration) |
 | **Deployment** | Docker, Docker Compose, Gunicorn |
 
 ---
@@ -78,14 +79,31 @@ The fastest way to get running — only Docker is needed. No Python, no PostgreS
 git clone https://github.com/Godstaf/AIVersus.git
 cd AIVersus
 
-# 2. Add your Gemini API key
+# 2. Add your API keys
 echo "GEMINI_API_KEY=your_key_here" > .env
+echo "JWT_SECRET_KEY=your_random_secret" >> .env
 
 # 3. Start everything
 docker compose up --build
 ```
 
-Open **http://localhost:5000** — that's it.
+---
+
+## Security
+
+### Authentication
+- **JWT (JSON Web Tokens):** Stateless authentication. Tokens are signed with `HS256` and stored in `localStorage`.
+- **Password Hashing:** Uses `werkzeug.security` (Flask's standard) with PBKDF2/Scrypt for robust protection.
+- **Auto-Migration:** Legacy accounts (SHA-256) are automatically upgraded to the new secure hash format upon re-registration with the same credentials.
+
+### Environment Variables
+| Variable | Description | Default |
+|---|---|---|
+| `GEMINI_API_KEY` | Google Gemini API Key | Required |
+| `JWT_SECRET_KEY` | Secret key for signing JWTs | `changeme` (Dev) |
+| `DB_PASSWORD` | PostgreSQL password | `aiversus_db_pass` |
+
+---
 
 ### Option 2: Local Development
 

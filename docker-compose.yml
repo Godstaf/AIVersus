@@ -43,6 +43,8 @@ services:
       # API Key — override via .env file or CLI:
       #   GEMINI_API_KEY=xxx docker compose up
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # JWT Secret (defaults to dev key if not set)
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-changeme}
     depends_on:
       db:
         condition: service_healthy

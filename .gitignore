@@ -22,4 +22,7 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Drafts (not for repo)
 aiversus_analysis.md
+linkedin_post.md
