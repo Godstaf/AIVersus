@@ -174,7 +174,7 @@ def get_chat_history_for_prompt(email=None, chat_id=None):
     return "{}"
 
 
-# ==================== AI DEBATE SYSTEM ====================
+#                 AI DEBATE SYSTEM 
 
 # Set to True to bypass API and use mock responses (for testing when rate limited)
 USE_MOCK_MODE = False
