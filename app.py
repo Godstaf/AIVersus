@@ -401,7 +401,7 @@ Provide your verdict as JSON (no markdown formatting):
 """
     
     try:
-        response = call_ai(prompt)
+        response = call_ai(prompt) 
         # Clean response
         response = response.strip()
         if response.startswith("```"):
