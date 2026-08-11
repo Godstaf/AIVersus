@@ -1,13 +1,21 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, g
 from google import genai
 from openai import OpenAI
-import psycopg2 as ps
+import psycopg2
 import os
 import time
 from datetime import timedelta
 from bson import ObjectId
 import postgresExtraFuncs as eFuncs
-from auth import verify_password, get_password_hash, create_access_token, token_required, decode_access_token
+from auth import (
+    get_password_hash,
+    create_access_token,
+    authenticate_user,
+    is_legacy_hash,
+    token_required,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+)
+from db import get_cursor, close_db
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -18,27 +26,13 @@ load_dotenv()
 
 
 app = Flask(__name__)
-app.secret_key = str(os.urandom(24))  # Generate a random secret key for session management
-print("secret key", app.secret_key)
+# Flask's own session is only used for a few UI toggle flags (see index()).
+# Authentication is stateless JWT (see auth.py) — it does NOT use Flask sessions.
+app.secret_key = os.urandom(24)  # signs the UI-state session cookie only
 
+# Each request gets its own PostgreSQL connection (db.get_db); close it on teardown.
+app.teardown_appcontext(close_db)
 
-# Connect to PostgreSQL database
-pwrd = os.getenv("DB_PASSWORD")
-
-
-try:
-    mycon = ps.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=pwrd,
-        dbname=os.getenv("DB_NAME", "aiversus")
-    )
-    print("Connected")
-except ps.Error as e:
-    print(f"Database connection failed: {e}")
-    exit(1)
-
-cr = mycon.cursor()
 
 @app.route("/")
 def index():
@@ -584,85 +578,98 @@ def registerit():
     emailId = request.form.get("email")
     name = request.form.get("name")
 
-    # Validate inputs
-    if not password or password.isspace():
-        return jsonify({"status": "error", "message": "Password cannot be empty or whitespace"}), 400
-    elif len(password) < 8:
-        return jsonify({"status": "error", "message": "Password must be at least 8 characters long"}), 400
-    elif not password.isalnum():
-        return jsonify({"status": "error", "message": "Password must be alphanumeric"}), 400
-
-    # Hash the password using bcrypt
-    hashed_password = get_password_hash(password)
-
     # Validate email and name
     if not emailId or not name:
         return jsonify({"status": "error", "message": "Email and Name cannot be empty"}), 400
 
+    # Validate password: allow any characters (symbols make passwords stronger).
+    # Enforce a sane length range; the upper bound respects bcrypt's 72-byte limit.
+    if not password or password.isspace():
+        return jsonify({"status": "error", "message": "Password cannot be empty or whitespace"}), 400
+    if len(password) < 8:
+        return jsonify({"status": "error", "message": "Password must be at least 8 characters long"}), 400
+    if len(password.encode("utf-8")) > 72:
+        return jsonify({"status": "error", "message": "Password is too long (max 72 bytes)"}), 400
+
+    # Hash the password with bcrypt
+    hashed_password = get_password_hash(password)
+
     try:
-        # Use parameterized query to insert data, updating password if user already exists
-        query = """
-            INSERT INTO "user" (name, email, password) 
-            VALUES (%s, %s, %s)
-            ON CONFLICT (email) 
-            DO UPDATE SET 
-                name = EXCLUDED.name, 
-                password = EXCLUDED.password
-        """
-        values = (name, emailId, hashed_password)
-        cr.execute(query, values)
-
-        # Commit the transaction to save changes
-        mycon.commit()
-
-        print("User registered successfully!")
-        return jsonify({"status": "success", "message": "User registered successfully!"}), 200
-
+        # Plain INSERT: reject a duplicate email instead of silently overwriting
+        # (email is the primary key, so a conflict raises UniqueViolation).
+        with get_cursor(commit=True) as cur:
+            cur.execute(
+                'INSERT INTO "user" (name, email, password) VALUES (%s, %s, %s)',
+                (name, emailId, hashed_password),
+            )
+    except psycopg2.errors.UniqueViolation:
+        return jsonify({"status": "error", "message": "Email already registered"}), 409
     except Exception as e:
-        print("Error:", e)
+        print("registerit error:", e)
         return jsonify({"status": "error", "message": "An error occurred while registering the user"}), 500
+
+    print("User registered successfully!")
+    return jsonify({"status": "success", "message": "User registered successfully!"}), 200
 
 
 
 
 @app.route("/loginit", methods=["POST"])
 def loginit():
-    """Authenticate user and return JWT access token (mirrors FastAPI /token endpoint)"""
+    """Authenticate a user and return a JWT access token (mirrors the tutorial's /token)."""
     emailId = request.form.get("email")
     password = request.form.get("password")
-    
-    if not password:
-        return jsonify({"status": "error", "message": "Password cannot be empty"}), 401
+
     if not emailId:
         return jsonify({"status": "error", "message": "Email cannot be empty"}), 401
-    
-    # Fetch user from database by email
-    query = "SELECT name, email, password FROM \"user\" WHERE email = %s"
-    cr.execute(query, (emailId,))
-    result = cr.fetchone()
-    
-    if result is None:
+    if not password:
+        return jsonify({"status": "error", "message": "Password cannot be empty"}), 401
+
+    # authenticate_user mirrors the tutorial: looks up the user and verifies the hash.
+    user = authenticate_user(emailId, password)
+    if not user:
         return jsonify({"status": "error", "message": "Invalid email or password"}), 401
-    
-    usrName, userEmail, stored_hash = result[0], result[1], result[2]
-    
-    # Verify password using bcrypt
-    if not verify_password(password, stored_hash):
-        return jsonify({"status": "error", "message": "Invalid email or password"}), 401
-    
-    # Create JWT access token (mirrors FastAPI tutorial's create_access_token)
-    access_token_expires = timedelta(minutes=30)
+
+    # Transparently upgrade legacy (Werkzeug) hashes to bcrypt on successful login.
+    if is_legacy_hash(user.hashed_password):
+        try:
+            with get_cursor(commit=True) as cur:
+                cur.execute(
+                    'UPDATE "user" SET password = %s WHERE email = %s',
+                    (get_password_hash(password), user.email),
+                )
+        except Exception as e:
+            print("password rehash skipped:", e)
+
+    first_name = user.full_name.split()[0] if user.full_name else ""
     access_token = create_access_token(
-        data={"sub": userEmail, "name": str(usrName).split()[0] if usrName else ""},
-        expires_delta=access_token_expires
+        data={"sub": user.email, "name": first_name},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-    
+
     return jsonify({
         "status": "success",
         "message": "Login successful!",
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
     }), 200
+
+
+@app.route("/token", methods=["POST"])
+def token():
+    """OAuth2-style alias of /loginit for tutorial parity (form fields: username, password)."""
+    email = request.form.get("username") or request.form.get("email")
+    password = request.form.get("password")
+
+    user = authenticate_user(email, password) if email and password else False
+    if not user:
+        return jsonify({"status": "error", "message": "Incorrect username or password"}), 401
+
+    access_token = create_access_token(
+        data={"sub": user.email},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return jsonify({"access_token": access_token, "token_type": "bearer"}), 200
 
 
 
@@ -670,12 +677,11 @@ def loginit():
 @app.route("/get_user", methods=["GET"])
 @token_required
 def get_user(current_user_email):
-    """Return user info from JWT token (mirrors FastAPI /users/me endpoint)"""
-    # Decode name from token payload
-    token = request.headers.get("Authorization", "").split(" ", 1)[1]
-    payload = decode_access_token(token)
-    name = payload.get("name", "")
-    return jsonify({"status": "success", "email": current_user_email, "name": name}), 200
+    """Return the current user's info (mirrors the tutorial's /users/me)."""
+    # token_required already resolved and validated the user onto g.current_user.
+    user = g.current_user
+    first_name = user.full_name.split()[0] if user.full_name else ""
+    return jsonify({"status": "success", "email": user.email, "name": first_name}), 200
 
 
 

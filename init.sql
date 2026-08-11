@@ -4,8 +4,13 @@
 CREATE TABLE IF NOT EXISTS "user" (
     name     VARCHAR(255),
     email    VARCHAR(255) NOT NULL PRIMARY KEY,
-    password VARCHAR(255)
+    password VARCHAR(255),
+    disabled BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+-- For an already-existing database (created before the `disabled` column),
+-- run this once to add it (safe to re-run):
+--   ALTER TABLE "user" ADD COLUMN IF NOT EXISTS disabled BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE IF NOT EXISTS chat_history (
     id           VARCHAR(255) NOT NULL PRIMARY KEY,

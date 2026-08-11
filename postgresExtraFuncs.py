@@ -1,45 +1,30 @@
-import psycopg2 as ps
+"""
+Chat-history CRUD helpers (PostgreSQL).
+
+Uses the shared per-request connection from db.py instead of a module-level
+global connection/cursor, so a failed query can no longer leave a shared
+connection stuck in an aborted-transaction state. All function signatures are
+unchanged, so callers in app.py are unaffected.
+"""
+
 from datetime import datetime
 import uuid
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
+from db import get_cursor
 
-# Connect to PostgreSQL database
-pwrd = os.getenv("DB_PASSWORD")
-
-try:
-    mycon = ps.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "postgres"),
-        password=pwrd,
-        dbname=os.getenv("DB_NAME", "aiversus")
-    )
-    print("Connected")
-
-
-except ps.Error as e:
-    print(f"Database connection failed: {e}")
-    exit(1)
-
-cr = mycon.cursor()
 
 def genUUID():
+    """Return a UUID that isn't already used in chat_history."""
     while True:
         generated_uuid = str(uuid.uuid4())
-        cr.execute('SELECT COUNT(*) FROM "chat_history" WHERE id = %s', (generated_uuid,))
-        result = cr.fetchone()
+        with get_cursor() as cur:
+            cur.execute('SELECT COUNT(*) FROM "chat_history" WHERE id = %s', (generated_uuid,))
+            result = cur.fetchone()
         if result is not None and result[0] == 0:
             return generated_uuid
 
 
-
-
 def insert_one(doc):
-    # print(type(doc))
-    
-    # print(doc)
     if type(doc) != dict:
         print("Error: doc type is not Dict")
         return
@@ -49,110 +34,112 @@ def insert_one(doc):
     response2 = doc["response2"]
     response3 = doc["response3"]
     last_updated = datetime.now()
-    print('\n', type(email), type(queries), type(response), type(response2), type(response3), sep = '\n', end = '\n\n')
-    
+
     try:
         new_uuid = genUUID()
-        insrtQry = "INSERT INTO \"chat_history\" (id, user_email, queries, response, response2, response3, last_updated) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        
-        cr.execute(insrtQry, (new_uuid, email, queries, response, response2, response3, last_updated))
-        mycon.commit()
-
+        insrtQry = (
+            'INSERT INTO "chat_history" '
+            "(id, user_email, queries, response, response2, response3, last_updated) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        )
+        with get_cursor(commit=True) as cur:
+            cur.execute(insrtQry, (new_uuid, email, queries, response, response2, response3, last_updated))
         print("insert_one ran successfully!")
         return new_uuid
-        
-        
+
     except Exception as e:
         print("insert_one Error:", e)
-        mycon.rollback()
         return None
-    
-    
 
 
 def find_one(id, email):
     result = None
     try:
-        findQry = "Select id, user_email, queries, response, response2, response3 from chat_history where id = %s and user_email = %s"
-        cr.execute(findQry, (id, email))
-        fetchedResult = cr.fetchone()
+        findQry = (
+            "Select id, user_email, queries, response, response2, response3 "
+            "from chat_history where id = %s and user_email = %s"
+        )
+        with get_cursor() as cur:
+            cur.execute(findQry, (id, email))
+            fetchedResult = cur.fetchone()
         if fetchedResult:
-            result = {"id": fetchedResult[0], "email": fetchedResult[1], "queries": fetchedResult[2], "response": fetchedResult[3], "response2": fetchedResult[4], "response3": fetchedResult[5]}
-            # print("Result found:", result)
+            result = {
+                "id": fetchedResult[0], "email": fetchedResult[1], "queries": fetchedResult[2],
+                "response": fetchedResult[3], "response2": fetchedResult[4], "response3": fetchedResult[5],
+            }
         else:
             print("Result not found")
-            
+
     except Exception as e:
         print("find_one Error:", e)
-        mycon.rollback()
-    
+
     return result
-    
+
 
 def findAll(email):
     result = None
     try:
-        findQry = "Select id, user_email, queries, response, response2, response3 from chat_history where user_email = %s"
-        cr.execute(findQry, (email,))
-        result = cr.fetchall()
+        findQry = (
+            "Select id, user_email, queries, response, response2, response3 "
+            "from chat_history where user_email = %s"
+        )
+        with get_cursor() as cur:
+            cur.execute(findQry, (email,))
+            result = cur.fetchall()
         if result:
             for i in range(len(result)):
-                result[i] = {"id": result[i][0], "email": result[i][1], "queries": result[i][2], "response": result[i][3], "response2": result[i][4], "response3": result[i][5]} # type: ignore
-            # print("Result found:", result)
+                result[i] = {
+                    "id": result[i][0], "email": result[i][1], "queries": result[i][2],
+                    "response": result[i][3], "response2": result[i][4], "response3": result[i][5],
+                }  # type: ignore
         else:
             print("Result not found")
-            
+
     except Exception as e:
         print("findAll Error:", e)
-        mycon.rollback()
-        
+
     return result
 
 
-
 def update_one(id, email, qry='', rep='', rep2='', rep3=''):
-    
-    # Demo query
-    """UPDATE chat_history SET queries = array_append(queries, 'This is a new query string.') WHERE id = 'e2f03b78-f0c1-40ce-a95d-26d54acc863e"""
-    
-    updateQry = "UPDATE chat_history SET queries = array_append(queries, %s), response = array_append(response, %s), response2 = array_append(response2, %s), response3 = array_append(response3, %s), last_updated = %s WHERE id = %s"
+    updateQry = (
+        "UPDATE chat_history SET queries = array_append(queries, %s), "
+        "response = array_append(response, %s), response2 = array_append(response2, %s), "
+        "response3 = array_append(response3, %s), last_updated = %s WHERE id = %s"
+    )
     try:
-        cr.execute(updateQry, (qry, rep, rep2, rep3, datetime.now(), id))
-        mycon.commit()
+        with get_cursor(commit=True) as cur:
+            cur.execute(updateQry, (qry, rep, rep2, rep3, datetime.now(), id))
         print("update_one ran successfully!")
         return True
 
     except Exception as e:
         print("update_one error:", e)
-        mycon.rollback
         return None
-    
+
 
 def delete_one(chat_id, email):
     """Delete a single chat by its ID and user email"""
     try:
         delQry = "DELETE FROM chat_history WHERE id = %s AND user_email = %s"
-        cr.execute(delQry, (chat_id, email))
-        mycon.commit()
+        with get_cursor(commit=True) as cur:
+            cur.execute(delQry, (chat_id, email))
         print(f"Chat {chat_id} deleted successfully!")
         return True
-        
+
     except Exception as e:
         print("delete_one error:", e)
-        mycon.rollback()
         return None
 
 
 def delete_many(email):
     try:
         delQry = "Delete from chat_history where user_email = %s and queries = \'{}\'"
-        cr.execute(delQry, (email, ))
-        mycon.commit()
+        with get_cursor(commit=True) as cur:
+            cur.execute(delQry, (email,))
         print("deleted successfully!")
         return 'Deletion successful'
-        
+
     except Exception as e:
         print("delete_many error:", e)
-        mycon.rollback()
         return None
-

@@ -25,3 +25,5 @@ pymongo==4.12.0
 
 # Auth
 python-jose[cryptography]
+bcrypt>=4.0
+# Werkzeug (listed above) is also used to verify legacy pbkdf2/scrypt password hashes
