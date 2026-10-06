@@ -191,7 +191,7 @@ async function main() {
             // Query div styled like live debate
             const queryDiv = document.createElement("div");
             queryDiv.className = "query-container";
-            queryDiv.innerHTML = `<strong>Debate Topic:</strong> ${topicText}`;
+            queryDiv.innerHTML = `<strong>Debate Topic: </strong> ${topicText}`;
             convoDiv.appendChild(queryDiv);
 
             // Parse balanced text and verdict from response3
@@ -569,7 +569,7 @@ async function main() {
     // Add the query/topic to conversation
     const newDiv = document.createElement("div");
     newDiv.className = "query-container";
-    newDiv.innerHTML = `<strong>🎯 Debate Topic:</strong> ${queryText}`;
+    newDiv.innerHTML = `<strong>Debate Topic: </strong> ${queryText}`;
     convoDiv.appendChild(newDiv);
 
     const formData = new FormData(this);
