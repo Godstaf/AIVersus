@@ -12,6 +12,7 @@ __pycache__/
 .venv/
 ENV/
 env/
+deactivate_conda.sh
 
 # IDE
 .vscode/
